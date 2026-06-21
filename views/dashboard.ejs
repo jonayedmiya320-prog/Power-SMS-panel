@@ -14,6 +14,30 @@
       <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
 
       <div class="content">
+
+        <div class="icon-grid">
+          <a href="/dashboard" class="icon-card">
+            <span class="icon-emoji">🖥️</span>
+            <span class="icon-label">Dashboard</span>
+          </a>
+          <a href="/clients" class="icon-card">
+            <span class="icon-emoji">👤</span>
+            <span class="icon-label">Clients</span>
+          </a>
+          <a href="/sms-test" class="icon-card">
+            <span class="icon-emoji">📡</span>
+            <span class="icon-label">SMS Test</span>
+          </a>
+          <a href="/reports" class="icon-card">
+            <span class="icon-emoji">📊</span>
+            <span class="icon-label">Statistics</span>
+          </a>
+          <a href="/credit-notes" class="icon-card">
+            <span class="icon-emoji">💼</span>
+            <span class="icon-label">Credit Notes</span>
+          </a>
+        </div>
+
         <div class="stat-grid">
           <div class="stat-card">
             <div class="stat-label">Today's SMS</div>
