@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power SMS | SMS Test Panel</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('partials/sidebar', { active: active, user: user }) %>
+
+    <div class="main">
+      <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
+
+      <div class="content">
+
+        <div class="page-card">
+          <h3>Send Test SMS</h3>
+          <form method="POST" action="/sms-test/send">
+            <div class="form-row">
+              <label for="number">Phone Number</label>
+              <input type="text" id="number" name="number" placeholder="e.g. +8801XXXXXXXXX" required>
+            </div>
+            <div class="form-row">
+              <label for="message">Message</label>
+              <input type="text" id="message" name="message" placeholder="Enter test message" required>
+            </div>
+            <button type="submit" class="btn-primary">Send Test SMS</button>
+          </form>
+        </div>
+
+        <div class="page-card">
+          <h3>Recent SMS Logs</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Number</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Sent By</th>
+                <th>Sent At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (logs.length === 0) { %>
+                <tr><td colspan="5">No SMS sent yet.</td></tr>
+              <% } %>
+              <% logs.forEach(function(log) { %>
+                <tr>
+                  <td><%= log.number %></td>
+                  <td><%= log.message %></td>
+                  <td>
+                    <span class="badge <%= log.status === 'sent' ? 'badge-active' : 'badge-inactive' %>">
+                      <%= log.status %>
+                    </span>
+                  </td>
+                  <td><%= log.sentBy %></td>
+                  <td><%= new Date(log.sentAt).toLocaleString() %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
