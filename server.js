@@ -26,6 +26,7 @@ const smsTestRoutes = require('./routes/smstest');
 const profileRoutes = require('./routes/profile');
 const reportsRoutes = require('./routes/reports');
 const creditNotesRoutes = require('./routes/creditnotes');
+const rangesRoutes = require('./routes/ranges');
 
 app.use('/', authRoutes);
 app.use('/dashboard', dashboardRoutes);
@@ -35,6 +36,7 @@ app.use('/sms-test', smsTestRoutes);
 app.use('/profile', profileRoutes);
 app.use('/reports', reportsRoutes);
 app.use('/credit-notes', creditNotesRoutes);
+app.use('/ranges', rangesRoutes);
 
 app.get('/', (req, res) => res.redirect('/login'));
 
