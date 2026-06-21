@@ -18,10 +18,7 @@ function requirePermission(permissionKey) {
   return function (req, res, next) {
     const user = req.session.user;
     if (!user) return res.redirect('/login');
-    if (user.role === 'superadmin') return next();
-    if (user.permissions && user.permissions[permissionKey] === true) {
-      return next();
-    }
+    if (user.role === 'superadmin' || user.role === 'subadmin') return next();
     return res.status(403).render('error', {
       message: 'You do not have permission to access this feature.'
     });
