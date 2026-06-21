@@ -13,6 +13,9 @@
     <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> SMS Test Panel
     </a>
+    <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
+      <span class="nav-icon">&#9632;</span> Reports
+    </a>
     <% if (user.role === 'superadmin') { %>
     <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> User Management
