@@ -16,6 +16,9 @@
     <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> Reports
     </a>
+    <a href="/credit-notes" class="<%= active === 'creditnotes' ? 'active' : '' %>">
+      <span class="nav-icon">&#9632;</span> Credit Notes
+    </a>
     <% if (user.role === 'superadmin') { %>
     <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> User Management
