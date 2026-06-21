@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power SMS | SMS Reports</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('partials/sidebar', { active: active, user: user }) %>
+
+    <div class="main">
+      <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
+
+      <div class="content">
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total SMS</div>
+            <div class="stat-value"><%= summary.totalCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Sent</div>
+            <div class="stat-value"><%= summary.sentCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value"><%= summary.pendingCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value"><%= summary.failedCount %></div>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <h3>Filter by Number</h3>
+          <form method="GET" action="/reports">
+            <div class="form-row">
+              <label for="number">Phone Number</label>
+              <input type="text" id="number" name="number" value="<%= filterNumber %>" placeholder="Search by number">
+            </div>
+            <button type="submit" class="btn-primary">Filter</button>
+          </form>
+        </div>
+
+        <div class="page-card">
+          <h3>SMS Log History</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Number</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Sent By</th>
+                <th>Sent At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (logs.length === 0) { %>
+                <tr><td colspan="5">No SMS records found.</td></tr>
+              <% } %>
+              <% logs.forEach(function(log) { %>
+                <tr>
+                  <td><%= log.number %></td>
+                  <td><%= log.message %></td>
+                  <td>
+                    <span class="badge <%= log.status === 'sent' ? 'badge-active' : 'badge-inactive' %>">
+                      <%= log.status %>
+                    </span>
+                  </td>
+                  <td><%= log.sentBy %></td>
+                  <td><%= new Date(log.sentAt).toLocaleString() %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
