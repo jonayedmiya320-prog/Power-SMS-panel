@@ -89,9 +89,9 @@ body {
 
 /* Main area */
 .main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  flex: 1 1 auto;
+  display: block;
+  width: 100%;
   min-width: 0;
 }
 
@@ -99,12 +99,8 @@ body {
   min-height: 60px;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
+  display: block;
   padding: 10px 20px;
-  gap: 4px;
 }
 
 .topbar-title {
@@ -129,8 +125,8 @@ body {
 
 .content {
   padding: 20px 16px;
+  display: block;
   width: 100%;
-  max-width: 600px;
 }
 
 /* Stat cards */
@@ -187,6 +183,7 @@ body {
   padding: 20px;
   border: 1px solid #e2e8f0;
   margin-bottom: 20px;
+  display: block;
   width: 100%;
 }
 
@@ -197,12 +194,14 @@ body {
 }
 
 .page-card form {
+  display: block;
   width: 100%;
 }
 
 .form-row {
-  margin-bottom: 14px;
+  display: block;
   width: 100%;
+  margin-bottom: 14px;
 }
 
 .form-row label {
@@ -215,8 +214,9 @@ body {
 .form-row input[type="text"],
 .form-row input[type="password"],
 .form-row select {
-  width: 100%;
   display: block;
+  width: 100%;
+  min-width: 250px;
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -225,11 +225,9 @@ body {
 }
 
 .checkbox-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  display: block;
   width: 100%;
+  margin-bottom: 16px;
 }
 
 .checkbox-item {
@@ -238,6 +236,7 @@ body {
   gap: 8px;
   font-size: 13px;
   color: #334155;
+  padding: 6px 0;
 }
 
 .checkbox-item input[type="checkbox"] {
