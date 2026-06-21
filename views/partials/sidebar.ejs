@@ -7,29 +7,40 @@
     <a href="/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> Dashboard
     </a>
-    <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> SMS Ranges
-    </a>
     <a href="/numbers" class="<%= active === 'numbers' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> My Numbers
     </a>
-    <a href="/clients" class="<%= active === 'clients' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> My Clients
-    </a>
-    <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> SMS Test Panel
-    </a>
-    <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> Reports
-    </a>
-    <a href="/credit-notes" class="<%= active === 'creditnotes' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> Credit Notes
-    </a>
-    <% if (user.role === 'superadmin') { %>
-    <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> User Management
-    </a>
+
+    <% if (user.role === 'client') { %>
+      <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS Reports
+      </a>
+      <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS Test Panel
+      </a>
+    <% } else { %>
+      <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS Ranges
+      </a>
+      <a href="/clients" class="<%= active === 'clients' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> My Clients
+      </a>
+      <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS Test Panel
+      </a>
+      <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Reports
+      </a>
+      <a href="/credit-notes" class="<%= active === 'creditnotes' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Credit Notes
+      </a>
+      <% if (user.role === 'superadmin') { %>
+      <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> User Management
+      </a>
+      <% } %>
     <% } %>
+
     <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> Profile
     </a>
