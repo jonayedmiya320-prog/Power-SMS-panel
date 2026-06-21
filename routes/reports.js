@@ -1,26 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/firebase');
-const { requireLogin, requirePermission } = require('../middleware/auth');
+const { requireLogin } = require('../middleware/auth');
 
-router.get('/', requireLogin, requirePermission('reports'), async (req, res) => {
+router.get('/', requireLogin, async (req, res) => {
   try {
-    const snapshot = await db.collection('sms_logs')
-      .orderBy('sentAt', 'desc')
-      .limit(100)
-      .get();
-
+    const snapshot = await db.collection('sms_logs').orderBy('sentAt', 'desc').limit(100).get();
     let logs = [];
     snapshot.forEach(doc => {
       const data = doc.data();
-      logs.push({
-        id: doc.id,
-        number: data.number,
-        message: data.message,
-        status: data.status,
-        sentBy: data.sentBy,
-        sentAt: data.sentAt
-      });
+      logs.push({ id: doc.id, number: data.number, message: data.message, status: data.status, sentBy: data.sentBy, sentAt: data.sentAt });
     });
 
     const filterNumber = req.query.number ? req.query.number.trim() : '';
