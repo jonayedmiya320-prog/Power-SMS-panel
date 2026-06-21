@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power SMS | User Management</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('partials/sidebar', { active: active, user: user }) %>
+
+    <div class="main">
+      <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
+
+      <div class="content">
+
+        <div class="page-card">
+          <h3>Create New Agent / Sub-Admin</h3>
+          <form method="POST" action="/user-management/create">
+            <div class="form-row">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-row">
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-row">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required minlength="6">
+            </div>
+
+            <div class="form-row">
+              <label>Permissions (pages this admin can access)</label>
+              <div class="checkbox-grid">
+                <% permissionKeys.forEach(function(key) { %>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="perm_<%= key %>">
+                    <%= key %>
+                  </label>
+                <% }); %>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Create Admin</button>
+          </form>
+        </div>
+
+        <div class="page-card">
+          <h3>Existing Admins</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Permissions</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (admins.length === 0) { %>
+                <tr><td colspan="5">No sub-admins created yet.</td></tr>
+              <% } %>
+              <% admins.forEach(function(admin) { %>
+                <tr>
+                  <td><%= admin.name %></td>
+                  <td><%= admin.username %></td>
+                  <td>
+                    <span class="badge <%= admin.status === 'active' ? 'badge-active' : 'badge-inactive' %>">
+                      <%= admin.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <% 
+                      const activePerms = Object.keys(admin.permissions).filter(k => admin.permissions[k]);
+                    %>
+                    <%= activePerms.length > 0 ? activePerms.join(', ') : 'None' %>
+                  </td>
+                  <td>
+                    <form method="POST" action="/user-management/toggle-status/<%= admin.id %>" style="display:inline">
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;">
+                        <%= admin.status === 'active' ? 'Deactivate' : 'Activate' %>
+                      </button>
+                    </form>
+                    <form method="POST" action="/user-management/delete/<%= admin.id %>" style="display:inline">
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;background:#dc2626;">
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
