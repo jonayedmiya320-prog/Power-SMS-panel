@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
       <div class="login-brand">
         <span class="brand-mark">P</span>
         <h1>Power SMS</h1>
-        <p>Admin Panel-এ প্রবেশ করুন</p>
+        <p>Sign in to Admin Panel</p>
       </div>
 
       <% if (error) { %>
@@ -20,13 +20,13 @@
       <% } %>
 
       <form method="POST" action="/login" class="login-form">
-        <label for="username">ইউজারনেম</label>
+        <label for="username">Username</label>
         <input type="text" id="username" name="username" required autofocus>
 
-        <label for="password">পাসওয়ার্ড</label>
+        <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
 
-        <button type="submit">লগইন করুন</button>
+        <button type="submit">Login</button>
       </form>
     </div>
   </div>
