@@ -6,7 +6,7 @@ const { requireLogin } = require('../middleware/auth');
 router.get('/', requireLogin, async (req, res) => {
   try {
     let query = db.collection('sms_numbers');
-    if (req.session.user.role !== 'superadmin') {
+    if (req.session.user.role === 'client') {
       query = query.where('assignedTo', '==', req.session.user.username);
     }
     const snapshot = await query.orderBy('createdAt', 'desc').get();
@@ -28,7 +28,7 @@ router.get('/', requireLogin, async (req, res) => {
 });
 
 router.post('/create', requireLogin, async (req, res) => {
-  if (req.session.user.role !== 'superadmin') return res.redirect('/numbers');
+  if (req.session.user.role === 'client') return res.redirect('/numbers');
   try {
     const { range, number } = req.body;
     if (!range || !number) return res.redirect('/numbers');
@@ -47,7 +47,7 @@ router.post('/create', requireLogin, async (req, res) => {
 });
 
 router.post('/assign/:id', requireLogin, async (req, res) => {
-  if (req.session.user.role !== 'superadmin') return res.redirect('/numbers');
+  if (req.session.user.role === 'client') return res.redirect('/numbers');
   try {
     const { assignedTo } = req.body;
     await db.collection('sms_numbers').doc(req.params.id).update({
@@ -62,7 +62,7 @@ router.post('/assign/:id', requireLogin, async (req, res) => {
 });
 
 router.post('/delete/:id', requireLogin, async (req, res) => {
-  if (req.session.user.role !== 'superadmin') return res.redirect('/numbers');
+  if (req.session.user.role === 'client') return res.redirect('/numbers');
   try {
     await db.collection('sms_numbers').doc(req.params.id).delete();
     res.redirect('/numbers');
