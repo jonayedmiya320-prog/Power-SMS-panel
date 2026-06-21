@@ -18,6 +18,16 @@
       <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> SMS Test Panel
       </a>
+    <% } else if (user.role === 'agent') { %>
+      <a href="/agent-clients" class="<%= active === 'agentclients' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> My Clients
+      </a>
+      <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS Test Panel
+      </a>
+      <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Reports
+      </a>
     <% } else { %>
       <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> SMS Ranges
