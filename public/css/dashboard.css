@@ -129,6 +129,8 @@ body {
 
 .content {
   padding: 20px 16px;
+  width: 100%;
+  max-width: 600px;
 }
 
 /* Stat cards */
@@ -185,6 +187,7 @@ body {
   padding: 20px;
   border: 1px solid #e2e8f0;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .page-card h3 {
@@ -193,8 +196,13 @@ body {
   color: #0f172a;
 }
 
+.page-card form {
+  width: 100%;
+}
+
 .form-row {
   margin-bottom: 14px;
+  width: 100%;
 }
 
 .form-row label {
@@ -208,10 +216,12 @@ body {
 .form-row input[type="password"],
 .form-row select {
   width: 100%;
-  padding: 9px 12px;
+  display: block;
+  padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .checkbox-grid {
@@ -219,6 +229,7 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .checkbox-item {
@@ -227,6 +238,11 @@ body {
   gap: 8px;
   font-size: 13px;
   color: #334155;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: auto;
+  margin: 0;
 }
 
 .btn-primary {
