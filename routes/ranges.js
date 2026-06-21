@@ -19,7 +19,7 @@ router.get('/', requireLogin, async (req, res) => {
 });
 
 router.post('/create', requireLogin, async (req, res) => {
-  if (req.session.user.role !== 'superadmin') return res.redirect('/ranges');
+  if (req.session.user.role === 'client') return res.redirect('/ranges');
   try {
     const { country, prefix, testNumber, currency, payout } = req.body;
     if (!country || !prefix) return res.redirect('/ranges');
@@ -39,7 +39,7 @@ router.post('/create', requireLogin, async (req, res) => {
 });
 
 router.post('/delete/:id', requireLogin, async (req, res) => {
-  if (req.session.user.role !== 'superadmin') return res.redirect('/ranges');
+  if (req.session.user.role === 'client') return res.redirect('/ranges');
   try {
     await db.collection('sms_ranges').doc(req.params.id).delete();
     res.redirect('/ranges');
