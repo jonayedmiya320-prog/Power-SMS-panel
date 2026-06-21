@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power SMS | News for Clients</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('partials/sidebar', { active: active, user: user }) %>
+    <div class="main">
+      <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
+      <div class="content">
+
+        <% if (user.role !== 'client' && user.role !== 'agent') { %>
+        <div class="page-card">
+          <h3>Post New Update</h3>
+          <form method="POST" action="/news/create">
+            <div class="form-row">
+              <label>Headline</label>
+              <input type="text" name="headline" required>
+            </div>
+            <div class="form-row">
+              <label>News / Update</label>
+              <input type="text" name="body" required>
+            </div>
+            <button type="submit" class="btn-primary">Post</button>
+          </form>
+        </div>
+        <% } %>
+
+        <div class="page-card">
+          <h3>News & Updates</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Headline</th>
+                <th>News</th>
+                <% if (user.role !== 'client' && user.role !== 'agent') { %><th>Action</th><% } %>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (newsList.length === 0) { %>
+                <tr><td colspan="4">No news posted yet.</td></tr>
+              <% } %>
+              <% newsList.forEach(function(n) { %>
+                <tr>
+                  <td><%= new Date(n.createdAt).toLocaleDateString() %></td>
+                  <td><%= n.headline %></td>
+                  <td><%= n.body %></td>
+                  <% if (user.role !== 'client' && user.role !== 'agent') { %>
+                  <td>
+                    <form method="POST" action="/news/delete/<%= n.id %>" style="display:inline">
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;background:#dc2626;">Delete</button>
+                    </form>
+                  </td>
+                  <% } %>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
