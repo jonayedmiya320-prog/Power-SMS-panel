@@ -21,10 +21,12 @@ app.use(session({
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const userManagementRoutes = require('./routes/usermanagement');
+const clientsRoutes = require('./routes/clients');
 
 app.use('/', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/user-management', userManagementRoutes);
+app.use('/clients', clientsRoutes);
 
 app.get('/', (req, res) => res.redirect('/login'));
 
