@@ -6,7 +6,7 @@ const { requireLogin } = require('../middleware/auth');
 router.get('/', requireLogin, async (req, res) => {
   try {
     let query = db.collection('sms_numbers');
-    if (req.session.user.role === 'client') {
+    if (req.session.user.role === 'agent' || req.session.user.role === 'client') {
       query = query.where('assignedTo', '==', req.session.user.username);
     }
     const snapshot = await query.orderBy('createdAt', 'desc').get();
@@ -16,9 +16,9 @@ router.get('/', requireLogin, async (req, res) => {
       numbers.push({ id: doc.id, range: d.range, number: d.number, assignedTo: d.assignedTo || '-', status: d.status });
     });
 
-    const clientsSnapshot = await db.collection('users').where('role', '==', 'client').get();
+    const agentsSnapshot = await db.collection('users').where('role', '==', 'agent').get();
     const clients = [];
-    clientsSnapshot.forEach(doc => clients.push(doc.data().username));
+    agentsSnapshot.forEach(doc => clients.push(doc.data().username));
 
     res.render('numbers', { user: req.session.user, active: 'numbers', pageTitle: 'My SMS Numbers', numbers, clients });
   } catch (err) {
@@ -28,7 +28,7 @@ router.get('/', requireLogin, async (req, res) => {
 });
 
 router.post('/create', requireLogin, async (req, res) => {
-  if (req.session.user.role === 'client') return res.redirect('/numbers');
+  if (req.session.user.role === 'client' || req.session.user.role === 'agent') return res.redirect('/numbers');
   try {
     const { range, number } = req.body;
     if (!range || !number) return res.redirect('/numbers');
@@ -47,7 +47,7 @@ router.post('/create', requireLogin, async (req, res) => {
 });
 
 router.post('/assign/:id', requireLogin, async (req, res) => {
-  if (req.session.user.role === 'client') return res.redirect('/numbers');
+  if (req.session.user.role === 'client' || req.session.user.role === 'agent') return res.redirect('/numbers');
   try {
     const { assignedTo } = req.body;
     await db.collection('sms_numbers').doc(req.params.id).update({
@@ -62,7 +62,7 @@ router.post('/assign/:id', requireLogin, async (req, res) => {
 });
 
 router.post('/delete/:id', requireLogin, async (req, res) => {
-  if (req.session.user.role === 'client') return res.redirect('/numbers');
+  if (req.session.user.role === 'client' || req.session.user.role === 'agent') return res.redirect('/numbers');
   try {
     await db.collection('sms_numbers').doc(req.params.id).delete();
     res.redirect('/numbers');
