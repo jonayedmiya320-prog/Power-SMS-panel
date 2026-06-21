@@ -3,47 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Power SMS | My Clients</title>
+  <title>Power SMS | My Agents</title>
   <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
   <div class="layout">
     <%- include('partials/sidebar', { active: active, user: user }) %>
-
     <div class="main">
       <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
-
       <div class="content">
 
         <div class="page-card">
-          <h3>Add New Client</h3>
+          <h3>Add New Agent</h3>
           <form method="POST" action="/clients/create">
             <div class="form-row">
-              <label for="name">Full Name</label>
-              <input type="text" id="name" name="name" required>
+              <label>Full Name</label>
+              <input type="text" name="name" required>
             </div>
             <div class="form-row">
-              <label for="username">Username</label>
-              <input type="text" id="username" name="username" required>
+              <label>Username</label>
+              <input type="text" name="username" required>
             </div>
             <div class="form-row">
-              <label for="password">Password</label>
-              <input type="password" id="password" name="password" required minlength="6">
+              <label>Password</label>
+              <input type="password" name="password" required minlength="6">
             </div>
             <div class="form-row">
-              <label for="email">Email</label>
-              <input type="text" id="email" name="email">
+              <label>Email</label>
+              <input type="text" name="email">
             </div>
             <div class="form-row">
-              <label for="country">Country</label>
-              <input type="text" id="country" name="country">
+              <label>Country</label>
+              <input type="text" name="country">
             </div>
-            <button type="submit" class="btn-primary">Add Client</button>
+            <button type="submit" class="btn-primary">Add Agent</button>
           </form>
         </div>
 
         <div class="page-card">
-          <h3>Client List</h3>
+          <h3>Agent List</h3>
           <table class="data-table">
             <thead>
               <tr>
@@ -57,7 +55,7 @@
             </thead>
             <tbody>
               <% if (clients.length === 0) { %>
-                <tr><td colspan="6">No clients added yet.</td></tr>
+                <tr><td colspan="6">No agents added yet.</td></tr>
               <% } %>
               <% clients.forEach(function(client) { %>
                 <tr>
@@ -66,9 +64,7 @@
                   <td><%= client.email %></td>
                   <td><%= client.country %></td>
                   <td>
-                    <span class="badge <%= client.status === 'active' ? 'badge-active' : 'badge-inactive' %>">
-                      <%= client.status %>
-                    </span>
+                    <span class="badge <%= client.status === 'active' ? 'badge-active' : 'badge-inactive' %>"><%= client.status %></span>
                   </td>
                   <td>
                     <form method="POST" action="/clients/toggle-status/<%= client.id %>" style="display:inline">
@@ -77,9 +73,7 @@
                       </button>
                     </form>
                     <form method="POST" action="/clients/delete/<%= client.id %>" style="display:inline">
-                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;background:#dc2626;">
-                        Delete
-                      </button>
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;background:#dc2626;">Delete</button>
                     </form>
                   </td>
                 </tr>
