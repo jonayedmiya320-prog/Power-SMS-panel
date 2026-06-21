@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/firebase');
-const { requireLogin, requirePermission } = require('../middleware/auth');
+const { requireLogin } = require('../middleware/auth');
 
-router.get('/', requireLogin, requirePermission('ranges'), async (req, res) => {
+router.get('/', requireLogin, async (req, res) => {
   try {
     const snapshot = await db.collection('sms_ranges').orderBy('createdAt', 'desc').get();
     const ranges = [];
@@ -18,7 +18,8 @@ router.get('/', requireLogin, requirePermission('ranges'), async (req, res) => {
   }
 });
 
-router.post('/create', requireLogin, requirePermission('ranges'), async (req, res) => {
+router.post('/create', requireLogin, async (req, res) => {
+  if (req.session.user.role !== 'superadmin') return res.redirect('/ranges');
   try {
     const { country, prefix, testNumber, currency, payout } = req.body;
     if (!country || !prefix) return res.redirect('/ranges');
@@ -37,7 +38,8 @@ router.post('/create', requireLogin, requirePermission('ranges'), async (req, re
   }
 });
 
-router.post('/delete/:id', requireLogin, requirePermission('ranges'), async (req, res) => {
+router.post('/delete/:id', requireLogin, async (req, res) => {
+  if (req.session.user.role !== 'superadmin') return res.redirect('/ranges');
   try {
     await db.collection('sms_ranges').doc(req.params.id).delete();
     res.redirect('/ranges');
