@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power SMS | My SMS Numbers</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('partials/sidebar', { active: active, user: user }) %>
+    <div class="main">
+      <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
+      <div class="content">
+
+        <% if (user.role !== 'client') { %>
+        <div class="page-card">
+          <h3>Add New Number</h3>
+          <form method="POST" action="/numbers/create">
+            <div class="form-row">
+              <label>Range / Country</label>
+              <input type="text" name="range" required>
+            </div>
+            <div class="form-row">
+              <label>Number</label>
+              <input type="text" name="number" required>
+            </div>
+            <button type="submit" class="btn-primary">Add Number</button>
+          </form>
+        </div>
+        <% } %>
+
+        <div class="page-card">
+          <h3>Numbers</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Range</th>
+                <th>Number</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <% if (user.role !== 'client') { %><th>Action</th><% } %>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (numbers.length === 0) { %>
+                <tr><td colspan="5">No numbers found.</td></tr>
+              <% } %>
+              <% numbers.forEach(function(n) { %>
+                <tr>
+                  <td><%= n.range %></td>
+                  <td><%= n.number %></td>
+                  <td><%= n.assignedTo %></td>
+                  <td>
+                    <span class="badge <%= n.status === 'assigned' ? 'badge-active' : 'badge-inactive' %>"><%= n.status %></span>
+                  </td>
+                  <% if (user.role !== 'client') { %>
+                  <td>
+                    <form method="POST" action="/numbers/assign/<%= n.id %>" style="display:inline">
+                      <select name="assignedTo" style="padding:4px;font-size:12px;">
+                        <option value="">-- Unassign --</option>
+                        <% clients.forEach(function(c) { %>
+                          <option value="<%= c %>" <%= n.assignedTo === c ? 'selected' : '' %>><%= c %></option>
+                        <% }); %>
+                      </select>
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;">Set</button>
+                    </form>
+                    <form method="POST" action="/numbers/delete/<%= n.id %>" style="display:inline">
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;background:#dc2626;">Delete</button>
+                    </form>
+                  </td>
+                  <% } %>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
