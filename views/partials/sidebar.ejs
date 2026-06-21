@@ -38,6 +38,9 @@
       <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> SMS Ranges
       </a>
+      <a href="/ratecard" class="<%= active === 'ratecard' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS RateCard
+      </a>
       <a href="/clients" class="<%= active === 'clients' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> My Agents
       </a>
@@ -55,6 +58,9 @@
       </a>
       <a href="/statements" class="<%= active === 'statements' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> Statements
+      </a>
+      <a href="/news" class="<%= active === 'news' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> News for Clients
       </a>
       <% if (user.role === 'superadmin') { %>
       <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
