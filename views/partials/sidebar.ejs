@@ -28,6 +28,12 @@
       <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> Reports
       </a>
+      <a href="/payment-requests" class="<%= active === 'paymentrequests' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Payment Requests
+      </a>
+      <a href="/statements" class="<%= active === 'statements' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Statements
+      </a>
     <% } else { %>
       <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> SMS Ranges
@@ -43,6 +49,12 @@
       </a>
       <a href="/credit-notes" class="<%= active === 'creditnotes' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> Credit Notes
+      </a>
+      <a href="/payment-requests" class="<%= active === 'paymentrequests' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Payment Requests
+      </a>
+      <a href="/statements" class="<%= active === 'statements' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> Statements
       </a>
       <% if (user.role === 'superadmin') { %>
       <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
