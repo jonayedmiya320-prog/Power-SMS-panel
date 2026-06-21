@@ -19,12 +19,10 @@ app.use(session({
 }));
 
 const authRoutes = require('./routes/auth');
-app.use('/', authRoutes);
+const dashboardRoutes = require('./routes/dashboard');
 
-app.get('/dashboard', (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-  res.send('Dashboard আসছে পরের ধাপে। আপনি লগইন করেছেন: ' + req.session.user.username);
-});
+app.use('/', authRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 app.get('/', (req, res) => res.redirect('/login'));
 
