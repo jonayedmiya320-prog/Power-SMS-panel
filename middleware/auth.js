@@ -8,7 +8,7 @@ function requireLogin(req, res, next) {
 function requireSuperAdmin(req, res, next) {
   if (!req.session.user || req.session.user.role !== 'superadmin') {
     return res.status(403).render('error', {
-      message: 'এই পেজ অ্যাক্সেস করার অনুমতি আপনার নেই।'
+      message: 'You do not have permission to access this page.'
     });
   }
   next();
@@ -23,7 +23,7 @@ function requirePermission(permissionKey) {
       return next();
     }
     return res.status(403).render('error', {
-      message: 'এই ফিচার অ্যাক্সেস করার অনুমতি আপনার নেই।'
+      message: 'You do not have permission to access this feature.'
     });
   };
 }
