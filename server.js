@@ -31,6 +31,8 @@ const numbersRoutes = require('./routes/numbers');
 const agentClientsRoutes = require('./routes/agentclients');
 const paymentRequestsRoutes = require('./routes/paymentrequests');
 const statementsRoutes = require('./routes/statements');
+const ratecardRoutes = require('./routes/ratecard');
+const newsRoutes = require('./routes/news');
 
 app.use('/', authRoutes);
 app.use('/dashboard', dashboardRoutes);
@@ -45,6 +47,8 @@ app.use('/numbers', numbersRoutes);
 app.use('/agent-clients', agentClientsRoutes);
 app.use('/payment-requests', paymentRequestsRoutes);
 app.use('/statements', statementsRoutes);
+app.use('/ratecard', ratecardRoutes);
+app.use('/news', newsRoutes);
 
 app.get('/', (req, res) => res.redirect('/login'));
 
