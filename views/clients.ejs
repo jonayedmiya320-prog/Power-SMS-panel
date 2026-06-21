@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power SMS | My Clients</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('partials/sidebar', { active: active, user: user }) %>
+
+    <div class="main">
+      <%- include('partials/topbar', { pageTitle: pageTitle, user: user }) %>
+
+      <div class="content">
+
+        <div class="page-card">
+          <h3>Add New Client</h3>
+          <form method="POST" action="/clients/create">
+            <div class="form-row">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-row">
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-row">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required minlength="6">
+            </div>
+            <div class="form-row">
+              <label for="email">Email</label>
+              <input type="text" id="email" name="email">
+            </div>
+            <div class="form-row">
+              <label for="country">Country</label>
+              <input type="text" id="country" name="country">
+            </div>
+            <button type="submit" class="btn-primary">Add Client</button>
+          </form>
+        </div>
+
+        <div class="page-card">
+          <h3>Client List</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Country</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (clients.length === 0) { %>
+                <tr><td colspan="6">No clients added yet.</td></tr>
+              <% } %>
+              <% clients.forEach(function(client) { %>
+                <tr>
+                  <td><%= client.name %></td>
+                  <td><%= client.username %></td>
+                  <td><%= client.email %></td>
+                  <td><%= client.country %></td>
+                  <td>
+                    <span class="badge <%= client.status === 'active' ? 'badge-active' : 'badge-inactive' %>">
+                      <%= client.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <form method="POST" action="/clients/toggle-status/<%= client.id %>" style="display:inline">
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;">
+                        <%= client.status === 'active' ? 'Deactivate' : 'Activate' %>
+                      </button>
+                    </form>
+                    <form method="POST" action="/clients/delete/<%= client.id %>" style="display:inline">
+                      <button type="submit" class="btn-primary" style="padding:5px 10px;font-size:12px;background:#dc2626;">
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
