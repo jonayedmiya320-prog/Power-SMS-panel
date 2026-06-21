@@ -29,6 +29,8 @@ const creditNotesRoutes = require('./routes/creditnotes');
 const rangesRoutes = require('./routes/ranges');
 const numbersRoutes = require('./routes/numbers');
 const agentClientsRoutes = require('./routes/agentclients');
+const paymentRequestsRoutes = require('./routes/paymentrequests');
+const statementsRoutes = require('./routes/statements');
 
 app.use('/', authRoutes);
 app.use('/dashboard', dashboardRoutes);
@@ -41,6 +43,8 @@ app.use('/credit-notes', creditNotesRoutes);
 app.use('/ranges', rangesRoutes);
 app.use('/numbers', numbersRoutes);
 app.use('/agent-clients', agentClientsRoutes);
+app.use('/payment-requests', paymentRequestsRoutes);
+app.use('/statements', statementsRoutes);
 
 app.get('/', (req, res) => res.redirect('/login'));
 
