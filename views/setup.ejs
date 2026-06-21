@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Power SMS | প্রথম সেটআপ</title>
+  <title>Power SMS | Initial Setup</title>
   <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
       <div class="login-brand">
         <span class="brand-mark">P</span>
         <h1>Power SMS</h1>
-        <p>প্রথম Super Admin অ্যাকাউন্ট তৈরি করুন</p>
+        <p>Create the first Super Admin account</p>
       </div>
 
       <% if (error) { %>
@@ -20,16 +20,16 @@
       <% } %>
 
       <form method="POST" action="/setup" class="login-form">
-        <label for="name">আপনার নাম</label>
-        <input type="text" id="name" name="name" placeholder="যেমন: Sadhin">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" placeholder="e.g. Sadhin">
 
-        <label for="username">ইউজারনেম</label>
+        <label for="username">Username</label>
         <input type="text" id="username" name="username" required autofocus>
 
-        <label for="password">পাসওয়ার্ড</label>
+        <label for="password">Password</label>
         <input type="password" id="password" name="password" required minlength="6">
 
-        <button type="submit">Super Admin তৈরি করুন</button>
+        <button type="submit">Create Super Admin</button>
       </form>
     </div>
   </div>
