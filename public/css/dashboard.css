@@ -345,3 +345,27 @@ body {
 .badge-inactive { background: #fee2e2; color: #991b1b; }
 .badge-super { background: #dbeafe; color: #1e40af; }
 .badge-sub { background: #fef3c7; color: #92400e; }
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-hidden {
+    display: flex !important;
+    transform: translateX(-100%) !important;
+  }
+
+  .main {
+    width: 100%;
+  }
+}
