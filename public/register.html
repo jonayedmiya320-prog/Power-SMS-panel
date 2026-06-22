@@ -3,178 +3,215 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Power SMS | Super Admin Setup</title>
+    <title>Flex SMS | Super Admin Setup</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <link rel="stylesheet" href="css/login.css" />
     <style>
-        .setup-container {
-            max-width: 420px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .setup-container .sub {
+        body {
+            font-family: Arial, sans-serif;
             font-size: 13px;
-            color: #6b7a8f;
-            margin-top: -6px;
+            background: #eee;
+            color: #333;
+        }
+
+        #register-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(170deg, #8faab8 0%, #607d8b 45%, #455a64 100%);
+        }
+        .register-box {
+            background: #0d1f3c;
+            border-radius: 18px;
+            padding: 38px 28px 34px;
+            width: 380px;
+            max-width: 94vw;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+        }
+        .register-box h2 {
+            color: #fff;
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        .register-box .sub {
+            color: #8ab4d6;
+            text-align: center;
+            font-size: 13px;
             margin-bottom: 20px;
         }
-        .setup-container .note {
-            background: #eef6ff;
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #1e2f44;
-            margin-bottom: 18px;
-            border-left: 4px solid #2a7de1;
+        .register-err {
+            background: rgba(220, 50, 50, .18);
+            border: 1px solid rgba(220, 80, 80, .35);
+            color: #ff8080;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            display: none;
         }
-        .setup-container .note i {
-            color: #2a7de1;
-            margin-right: 8px;
+        .lf-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .lf-wrap .lf-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+        }
+        .lf-input {
+            width: 100%;
+            background: #e6e6e6;
+            border: none;
+            border-radius: 28px;
+            padding: 13px 16px 13px 42px;
+            font-size: 14px;
+            color: #555;
+            outline: none;
+            display: block;
+        }
+        .lf-input:focus {
+            background: #ddd;
         }
         .btn-register {
-            background: #27ae60;
+            width: 100%;
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 28px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            cursor: pointer;
         }
         .btn-register:hover {
-            background: #219a52;
+            background: #43a047;
         }
         .login-link {
             text-align: center;
-            margin-top: 16px;
-            font-size: 13px;
+            margin-top: 14px;
+            font-size: 12px;
+            color: #8ab4d6;
         }
         .login-link a {
-            color: #2a7de1;
-            font-weight: 500;
+            color: #6CF;
+            text-decoration: none;
         }
         .login-link a:hover {
             text-decoration: underline;
+        }
+        .note {
+            background: rgba(255, 255, 255, 0.06);
+            border-left: 3px solid #4caf50;
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: #b0d4e8;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+        .note i {
+            color: #4caf50;
+            margin-right: 6px;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-page">
-        <div class="login-container setup-container">
+    <div id="register-page">
+        <div class="register-box">
+            <h2><i class="fa fa-user-plus"></i> Super Admin</h2>
+            <p class="sub">Create the first administrator account</p>
 
-            <!-- Logo -->
-            <div class="logo-area">
-                <i class="fas fa-user-shield logo-icon"></i>
-                <h1>Super Admin Setup</h1>
-                <p class="sub">Create the first administrator account</p>
-            </div>
-
-            <!-- Note -->
             <div class="note">
-                <i class="fas fa-info-circle"></i>
-                This account will have full control over the system.
-                Only one Super Admin can exist.
+                <i class="fa fa-info-circle"></i>
+                This account will have full control. Only one Super Admin can exist.
             </div>
 
-            <!-- Error Message -->
-            <div class="error-msg" id="registerError"></div>
+            <div class="register-err" id="registerError"></div>
 
-            <!-- Username -->
-            <div class="input-group">
-                <label>Username</label>
-                <div class="input-wrap">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="regUsername" placeholder="e.g. admin" autocomplete="off" />
-                </div>
+            <div class="lf-wrap">
+                <i class="fa fa-user lf-icon"></i>
+                <input class="lf-input" type="text" id="regUsername" placeholder="Username" />
             </div>
 
-            <!-- Email -->
-            <div class="input-group">
-                <label>Email Address</label>
-                <div class="input-wrap">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="regEmail" placeholder="admin@example.com" autocomplete="email" />
-                </div>
+            <div class="lf-wrap">
+                <i class="fa fa-envelope lf-icon"></i>
+                <input class="lf-input" type="email" id="regEmail" placeholder="Email address" />
             </div>
 
-            <!-- Password -->
-            <div class="input-group">
-                <label>Password</label>
-                <div class="input-wrap">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="regPassword" placeholder="Min 6 characters" />
-                </div>
+            <div class="lf-wrap">
+                <i class="fa fa-lock lf-icon"></i>
+                <input class="lf-input" type="password" id="regPassword" placeholder="Password (min 6 chars)" />
             </div>
 
-            <!-- Confirm Password -->
-            <div class="input-group">
-                <label>Confirm Password</label>
-                <div class="input-wrap">
-                    <i class="fas fa-check-circle"></i>
-                    <input type="password" id="regConfirmPassword" placeholder="Re-enter password" />
-                </div>
+            <div class="lf-wrap">
+                <i class="fa fa-check-circle lf-icon"></i>
+                <input class="lf-input" type="password" id="regConfirmPassword" placeholder="Confirm password" />
             </div>
 
-            <!-- Register Button -->
-            <button class="btn-login btn-register" id="registerBtn">
-                <i class="fas fa-user-plus"></i> Create Super Admin
+            <button class="btn-register" id="registerBtn">
+                <i class="fa fa-user-plus"></i> CREATE SUPER ADMIN
             </button>
 
-            <!-- Login Link -->
             <div class="login-link">
                 Already have an account? <a href="index.html">Login</a>
             </div>
-
         </div>
     </div>
 
     <script src="js/firebase-config.js"></script>
     <script>
-        // ==========================================
-        // Register Logic
-        // ==========================================
-
         document.getElementById('registerBtn').addEventListener('click', async function() {
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const confirm = document.getElementById('regConfirmPassword').value;
             const errorEl = document.getElementById('registerError');
 
-            // Reset error
             errorEl.style.display = 'none';
             errorEl.textContent = '';
 
-            // Validation
-            if (!username || username.length < 3) {
+            if (username.length < 3) {
                 errorEl.textContent = '❌ Username must be at least 3 characters.';
                 errorEl.style.display = 'block';
                 return;
             }
-
             if (!email || !email.includes('@')) {
-                errorEl.textContent = '❌ Please enter a valid email address.';
+                errorEl.textContent = '❌ Please enter a valid email.';
                 errorEl.style.display = 'block';
                 return;
             }
-
-            if (!password || password.length < 6) {
+            if (password.length < 6) {
                 errorEl.textContent = '❌ Password must be at least 6 characters.';
                 errorEl.style.display = 'block';
                 return;
             }
-
-            if (password !== confirmPassword) {
+            if (password !== confirm) {
                 errorEl.textContent = '❌ Passwords do not match.';
                 errorEl.style.display = 'block';
                 return;
             }
 
             const btn = document.getElementById('registerBtn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> CREATING...';
             btn.disabled = true;
 
             try {
-                // Check if Super Admin already exists
                 const snapshot = await db.collection('users')
                     .where('role', '==', 'SUPER_ADMIN')
                     .get();
@@ -182,16 +219,14 @@
                 if (!snapshot.empty) {
                     errorEl.textContent = '❌ Super Admin already exists! Please login.';
                     errorEl.style.display = 'block';
-                    btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Super Admin';
+                    btn.innerHTML = '<i class="fa fa-user-plus"></i> CREATE SUPER ADMIN';
                     btn.disabled = false;
                     return;
                 }
 
-                // Create user with Firebase Auth
                 const userCred = await auth.createUserWithEmailAndPassword(email, password);
                 const uid = userCred.user.uid;
 
-                // Save user data in Firestore
                 await db.collection('users').doc(uid).set({
                     username: username,
                     email: email,
@@ -200,25 +235,20 @@
                     createdBy: null
                 });
 
-                // Store session
                 localStorage.setItem('userUID', uid);
                 localStorage.setItem('userRole', 'SUPER_ADMIN');
                 localStorage.setItem('userName', username);
 
-                // Redirect to dashboard
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
-                console.error('Registration error:', err);
-                errorEl.textContent = '❌ ' + (err.message || 'Registration failed. Please try again.');
+                errorEl.textContent = '❌ ' + (err.message || 'Registration failed.');
                 errorEl.style.display = 'block';
-
-                btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Super Admin';
+                btn.innerHTML = '<i class="fa fa-user-plus"></i> CREATE SUPER ADMIN';
                 btn.disabled = false;
             }
         });
 
-        // ===== ENTER KEY SUPPORT =====
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 document.getElementById('registerBtn').click();
