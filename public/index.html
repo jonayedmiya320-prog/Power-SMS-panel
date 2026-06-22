@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Power SMS | Login</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/login.css" />
+</head>
+<body>
+
+    <!-- ===== LOGIN PAGE ===== -->
+    <div class="login-page">
+        <div class="login-container">
+
+            <!-- Logo -->
+            <div class="logo-area">
+                <i class="fas fa-sms logo-icon"></i>
+                <h1>Power SMS</h1>
+                <p class="sub">Login to your dashboard</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-msg" id="loginError">Invalid email or password!</div>
+
+            <!-- Email -->
+            <div class="input-group">
+                <label>Email Address</label>
+                <div class="input-wrap">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="input-group">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" />
+                </div>
+            </div>
+
+            <!-- Captcha -->
+            <div class="captcha-row">
+                <span id="captchaQuestion">What is 0 + 1 = ?</span>
+                <input type="text" id="captchaInput" placeholder="Answer" autocomplete="off" />
+            </div>
+
+            <!-- Login Button -->
+            <button class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+
+            <!-- Setup Link (hidden by default) -->
+            <div class="setup-link">
+                <a href="#" id="setupLink" style="display: none;">Create Super Admin Account</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+
+</body>
+</html>
