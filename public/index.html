@@ -3,81 +3,257 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Power SMS | Login</title>
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <title>Flex SMS | Login</title>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/login.css" />
+    <style>
+        /* আপনার আসল FlexSMS CSS - আমি পুরোটা দিচ্ছি */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            background: #eee;
+            color: #333;
+        }
+        a {
+            text-decoration: none;
+            color: #0068a3;
+        }
+
+        /* ===== LOGIN ===== */
+        #login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(170deg, #8faab8 0%, #607d8b 45%, #455a64 100%);
+        }
+        .login-box {
+            background: #0d1f3c;
+            border-radius: 18px;
+            padding: 38px 28px 34px;
+            width: 340px;
+            max-width: 94vw;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+        }
+        .login-err {
+            background: rgba(220, 50, 50, .18);
+            border: 1px solid rgba(220, 80, 80, .35);
+            color: #ff8080;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            display: none;
+        }
+        .lf-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .lf-wrap .lf-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+        }
+        .lf-input {
+            width: 100%;
+            background: #e6e6e6;
+            border: none;
+            border-radius: 28px;
+            padding: 13px 16px 13px 42px;
+            font-size: 14px;
+            color: #555;
+            outline: none;
+            display: block;
+        }
+        .lf-input:focus {
+            background: #ddd;
+        }
+        .captcha-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .captcha-line input {
+            background: #fff;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 13px;
+            width: 90px;
+            outline: none;
+            color: #333;
+        }
+        .btn-login {
+            width: 100%;
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 28px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+        }
+        .btn-login:hover {
+            background: #43a047;
+        }
+
+        .setup-link {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12px;
+        }
+        .setup-link a {
+            color: #6CF;
+            text-decoration: none;
+        }
+        .setup-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- ===== LOGIN PAGE ===== -->
-    <div class="login-page">
-        <div class="login-container">
+    <!-- ===== LOGIN ===== -->
+    <div id="login-page">
+        <div class="login-box">
+            <div class="login-err" id="loginError">Invalid email or password!</div>
 
-            <!-- Logo -->
-            <div class="logo-area">
-                <i class="fas fa-sms logo-icon"></i>
-                <h1>Power SMS</h1>
-                <p class="sub">Login to your dashboard</p>
+            <div class="lf-wrap">
+                <i class="fa fa-envelope lf-icon"></i>
+                <input class="lf-input" type="email" id="loginEmail" placeholder="Email address" />
             </div>
 
-            <!-- Error Message -->
-            <div class="error-msg" id="loginError">Invalid email or password!</div>
-
-            <!-- Email -->
-            <div class="input-group">
-                <label>Email Address</label>
-                <div class="input-wrap">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
-                </div>
+            <div class="lf-wrap">
+                <i class="fa fa-lock lf-icon"></i>
+                <input class="lf-input" type="password" id="loginPassword" placeholder="Password" />
             </div>
 
-            <!-- Password -->
-            <div class="input-group">
-                <label>Password</label>
-                <div class="input-wrap">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" />
-                </div>
-            </div>
-
-            <!-- Captcha -->
-            <div class="captcha-row">
+            <div class="captcha-line">
                 <span id="captchaQuestion">What is 0 + 1 = ?</span>
-                <input type="text" id="captchaInput" placeholder="Answer" autocomplete="off" />
+                <input type="text" id="captchaInput" placeholder="Answer" />
             </div>
 
-            <!-- Login Button -->
-            <button class="btn-login" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
+            <button class="btn-login" id="loginBtn">LOGIN</button>
 
-            <!-- Setup Link (hidden by default) -->
             <div class="setup-link">
                 <a href="#" id="setupLink" style="display: none;">Create Super Admin Account</a>
             </div>
-
         </div>
     </div>
 
-    <!-- ===== JAVASCRIPT ===== -->
+    <!-- ===== FIREBASE + LOGIC ===== -->
     <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
+    <script>
+        // ===== CAPTCHA =====
+        let num1 = 0,
+            num2 = 1;
+
+        function generateCaptcha() {
+            num1 = Math.floor(Math.random() * 9);
+            num2 = Math.floor(Math.random() * 9);
+            document.getElementById('captchaQuestion').textContent =
+                'What is ' + num1 + ' + ' + num2 + ' = ?';
+            document.getElementById('captchaInput').value = '';
+        }
+        generateCaptcha();
+
+        // ===== CHECK SUPER ADMIN =====
+        async function checkSetupStatus() {
+            try {
+                const snapshot = await db.collection('users')
+                    .where('role', '==', 'SUPER_ADMIN')
+                    .get();
+                const link = document.getElementById('setupLink');
+                if (snapshot.empty) {
+                    link.style.display = 'block';
+                    link.href = 'register.html';
+                } else {
+                    link.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Setup check error:', err);
+            }
+        }
+        checkSetupStatus();
+
+        // ===== LOGIN =====
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const captchaAnswer = parseInt(document.getElementById('captchaInput').value, 10);
+            const errorEl = document.getElementById('loginError');
+
+            if (captchaAnswer !== num1 + num2) {
+                errorEl.textContent = 'Invalid captcha! Please try again.';
+                errorEl.style.display = 'block';
+                generateCaptcha();
+                return;
+            }
+
+            if (!email || !password) {
+                errorEl.textContent = 'Please enter email and password.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('loginBtn');
+            btn.textContent = 'LOGGING IN...';
+            btn.disabled = true;
+            errorEl.style.display = 'none';
+
+            try {
+                const userCred = await auth.signInWithEmailAndPassword(email, password);
+                const uid = userCred.user.uid;
+                const doc = await db.collection('users').doc(uid).get();
+
+                if (!doc.exists) {
+                    throw new Error('User data not found.');
+                }
+
+                const data = doc.data();
+                localStorage.setItem('userUID', uid);
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('userName', data.username);
+
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                errorEl.textContent = err.message || 'Login failed!';
+                errorEl.style.display = 'block';
+                generateCaptcha();
+                btn.textContent = 'LOGIN';
+                btn.disabled = false;
+            }
+        });
+
+        // ===== ENTER KEY =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginBtn').click();
+            }
+        });
+    </script>
 
 </body>
 </html>
