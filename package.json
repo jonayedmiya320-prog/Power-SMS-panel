@@ -1,11 +1,8 @@
 {
-  "name": "power-sms",
+  "name": "power-sms-panel",
   "version": "1.0.0",
-  "description": "Power SMS Management System",
-  "main": "server.js",
   "scripts": {
-    "start": "serve -s frontend/public",
-    "dev": "serve -s frontend/public"
+    "start": "npx serve -s frontend/public -l 0.0.0.0:3000"
   },
   "dependencies": {
     "serve": "^14.2.0"
