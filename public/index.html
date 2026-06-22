@@ -14,7 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* আপনার আসল FlexSMS CSS - আমি পুরোটা দিচ্ছি */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -26,12 +25,7 @@
             background: #eee;
             color: #333;
         }
-        a {
-            text-decoration: none;
-            color: #0068a3;
-        }
 
-        /* ===== LOGIN ===== */
         #login-page {
             display: flex;
             align-items: center;
@@ -117,7 +111,6 @@
         .btn-login:hover {
             background: #43a047;
         }
-
         .setup-link {
             text-align: center;
             margin-top: 14px;
@@ -137,13 +130,15 @@
     <!-- ===== LOGIN ===== -->
     <div id="login-page">
         <div class="login-box">
-            <div class="login-err" id="loginError">Invalid email or password!</div>
+            <div class="login-err" id="loginError">Invalid username or password!</div>
 
+            <!-- Only Username -->
             <div class="lf-wrap">
-                <i class="fa fa-envelope lf-icon"></i>
-                <input class="lf-input" type="email" id="loginEmail" placeholder="Email address" />
+                <i class="fa fa-user lf-icon"></i>
+                <input class="lf-input" type="text" id="loginUsername" placeholder="Username" />
             </div>
 
+            <!-- Only Password -->
             <div class="lf-wrap">
                 <i class="fa fa-lock lf-icon"></i>
                 <input class="lf-input" type="password" id="loginPassword" placeholder="Password" />
@@ -199,11 +194,12 @@
 
         // ===== LOGIN =====
         document.getElementById('loginBtn').addEventListener('click', async function() {
-            const email = document.getElementById('loginEmail').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
             const captchaAnswer = parseInt(document.getElementById('captchaInput').value, 10);
             const errorEl = document.getElementById('loginError');
 
+            // Validate captcha
             if (captchaAnswer !== num1 + num2) {
                 errorEl.textContent = 'Invalid captcha! Please try again.';
                 errorEl.style.display = 'block';
@@ -211,8 +207,9 @@
                 return;
             }
 
-            if (!email || !password) {
-                errorEl.textContent = 'Please enter email and password.';
+            // Validate fields
+            if (!username || !password) {
+                errorEl.textContent = 'Please enter username and password.';
                 errorEl.style.display = 'block';
                 return;
             }
@@ -223,22 +220,31 @@
             errorEl.style.display = 'none';
 
             try {
+                // Convert username to email format (same as registration)
+                const email = username.toLowerCase().replace(/\s/g, '') + '@flexsms.local';
+
+                // Firebase login
                 const userCred = await auth.signInWithEmailAndPassword(email, password);
                 const uid = userCred.user.uid;
-                const doc = await db.collection('users').doc(uid).get();
 
+                // Get user data from Firestore
+                const doc = await db.collection('users').doc(uid).get();
                 if (!doc.exists) {
                     throw new Error('User data not found.');
                 }
 
                 const data = doc.data();
+
+                // Save session
                 localStorage.setItem('userUID', uid);
                 localStorage.setItem('userRole', data.role);
                 localStorage.setItem('userName', data.username);
 
+                // Redirect to dashboard
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
+                console.error('Login error:', err);
                 errorEl.textContent = err.message || 'Login failed!';
                 errorEl.style.display = 'block';
                 generateCaptcha();
