@@ -1,0 +1,13 @@
+{
+  "name": "power-sms",
+  "version": "1.0.0",
+  "description": "Power SMS Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "serve -s frontend/public",
+    "dev": "serve -s frontend/public"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
