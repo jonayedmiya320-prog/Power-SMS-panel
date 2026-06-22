@@ -1,0 +1,214 @@
+/* ==========================================
+   public/css/login.css
+   ========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fc;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== LOGIN PAGE ===== */
+.login-page {
+    width: 100%;
+    padding: 20px;
+}
+
+.login-container {
+    background: #ffffff;
+    padding: 40px 32px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    transition: 0.3s;
+}
+
+/* ===== LOGO ===== */
+.logo-area {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.logo-icon {
+    font-size: 40px;
+    color: #0b2b4a;
+    background: #eef3f9;
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+}
+
+.logo-area h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0b2b4a;
+}
+
+.logo-area .sub {
+    color: #6b7a8f;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* ===== ERROR ===== */
+.error-msg {
+    background: #ffe9e9;
+    color: #b33c3c;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+}
+
+/* ===== INPUT GROUP ===== */
+.input-group {
+    margin-bottom: 18px;
+}
+
+.input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e2f44;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-wrap {
+    display: flex;
+    align-items: center;
+    background: #f0f3f8;
+    border-radius: 10px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    transition: 0.2s;
+}
+
+.input-wrap:focus-within {
+    border-color: #2a7de1;
+    background: #fff;
+}
+
+.input-wrap i {
+    color: #8a9bb5;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.input-wrap input {
+    border: none;
+    background: transparent;
+    padding: 14px 0;
+    font-size: 14px;
+    width: 100%;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== CAPTCHA ===== */
+.captcha-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f0f3f8;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+}
+
+.captcha-row span {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0b2b4a;
+}
+
+.captcha-row input {
+    border: none;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 80px;
+    font-size: 14px;
+    outline: 1px solid #dce1e9;
+    font-family: 'Inter', sans-serif;
+}
+
+.captcha-row input:focus {
+    outline-color: #2a7de1;
+}
+
+/* ===== BUTTON ===== */
+.btn-login {
+    width: 100%;
+    background: #0b2b4a;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-login:hover {
+    background: #1a3f62;
+}
+
+.btn-login:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== SETUP LINK ===== */
+.setup-link {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+}
+
+.setup-link a {
+    color: #2a7de1;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.setup-link a:hover {
+    text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 28px 20px;
+        margin: 0 12px;
+    }
+
+    .logo-area h1 {
+        font-size: 22px;
+    }
+
+    .captcha-row {
+        flex-wrap: wrap;
+    }
+
+    .captcha-row input {
+        width: 100%;
+    }
+}
