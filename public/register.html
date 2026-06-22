@@ -144,16 +144,13 @@
 
             <div class="register-err" id="registerError"></div>
 
+            <!-- Only Username -->
             <div class="lf-wrap">
                 <i class="fa fa-user lf-icon"></i>
-                <input class="lf-input" type="text" id="regUsername" placeholder="Username" />
+                <input class="lf-input" type="text" id="regUsername" placeholder="Choose a username" />
             </div>
 
-            <div class="lf-wrap">
-                <i class="fa fa-envelope lf-icon"></i>
-                <input class="lf-input" type="email" id="regEmail" placeholder="Email address" />
-            </div>
-
+            <!-- Only Password -->
             <div class="lf-wrap">
                 <i class="fa fa-lock lf-icon"></i>
                 <input class="lf-input" type="password" id="regPassword" placeholder="Password (min 6 chars)" />
@@ -178,7 +175,6 @@
     <script>
         document.getElementById('registerBtn').addEventListener('click', async function() {
             const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('regConfirmPassword').value;
             const errorEl = document.getElementById('registerError');
@@ -186,21 +182,20 @@
             errorEl.style.display = 'none';
             errorEl.textContent = '';
 
+            // Validate username
             if (username.length < 3) {
                 errorEl.textContent = '❌ Username must be at least 3 characters.';
                 errorEl.style.display = 'block';
                 return;
             }
-            if (!email || !email.includes('@')) {
-                errorEl.textContent = '❌ Please enter a valid email.';
-                errorEl.style.display = 'block';
-                return;
-            }
+
+            // Validate password
             if (password.length < 6) {
                 errorEl.textContent = '❌ Password must be at least 6 characters.';
                 errorEl.style.display = 'block';
                 return;
             }
+
             if (password !== confirm) {
                 errorEl.textContent = '❌ Passwords do not match.';
                 errorEl.style.display = 'block';
@@ -212,6 +207,7 @@
             btn.disabled = true;
 
             try {
+                // Check if Super Admin already exists
                 const snapshot = await db.collection('users')
                     .where('role', '==', 'SUPER_ADMIN')
                     .get();
@@ -224,31 +220,40 @@
                     return;
                 }
 
-                const userCred = await auth.createUserWithEmailAndPassword(email, password);
+                // Generate a dummy email for Firebase Auth (user never sees this)
+                const dummyEmail = username.toLowerCase().replace(/\s/g, '') + '@flexsms.local';
+
+                // Create user with Firebase Auth
+                const userCred = await auth.createUserWithEmailAndPassword(dummyEmail, password);
                 const uid = userCred.user.uid;
 
+                // Save user data in Firestore
                 await db.collection('users').doc(uid).set({
                     username: username,
-                    email: email,
+                    email: dummyEmail, // stored but hidden from user
                     role: 'SUPER_ADMIN',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     createdBy: null
                 });
 
+                // Store session
                 localStorage.setItem('userUID', uid);
                 localStorage.setItem('userRole', 'SUPER_ADMIN');
                 localStorage.setItem('userName', username);
 
+                // Redirect to dashboard
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
-                errorEl.textContent = '❌ ' + (err.message || 'Registration failed.');
+                console.error('Registration error:', err);
+                errorEl.textContent = '❌ ' + (err.message || 'Registration failed. Try a different username.');
                 errorEl.style.display = 'block';
                 btn.innerHTML = '<i class="fa fa-user-plus"></i> CREATE SUPER ADMIN';
                 btn.disabled = false;
             }
         });
 
+        // Enter key support
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 document.getElementById('registerBtn').click();
