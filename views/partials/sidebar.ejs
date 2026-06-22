@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" id="mainSidebar">
   <div class="sidebar-brand">
     <span class="brand-mark">P</span>
     <span class="brand-name">Power SMS</span>
@@ -7,18 +7,29 @@
     <a href="/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">
       <span class="nav-icon">&#9632;</span> Dashboard
     </a>
-    <a href="/numbers" class="<%= active === 'numbers' ? 'active' : '' %>">
-      <span class="nav-icon">&#9632;</span> My Numbers
-    </a>
 
     <% if (user.role === 'client') { %>
+      <a href="/numbers" class="<%= active === 'numbers' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> My Numbers
+      </a>
       <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> SMS Reports
       </a>
       <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> SMS Test Panel
       </a>
+
     <% } else if (user.role === 'agent') { %>
+      <div class="nav-group">
+        <div class="nav-group-title" onclick="toggleGroup(this)">
+          <span class="nav-icon">&#9632;</span> SMS Module <span class="arrow">▼</span>
+        </div>
+        <div class="nav-group-items">
+          <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">SMS Ranges</a>
+          <a href="/numbers" class="<%= active === 'numbers' ? 'active' : '' %>">My Numbers</a>
+          <a href="/ratecard" class="<%= active === 'ratecard' ? 'active' : '' %>">SMS RateCard</a>
+        </div>
+      </div>
       <a href="/agent-clients" class="<%= active === 'agentclients' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> My Clients
       </a>
@@ -34,22 +45,32 @@
       <a href="/statements" class="<%= active === 'statements' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> Statements
       </a>
+
     <% } else { %>
-      <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">
-        <span class="nav-icon">&#9632;</span> SMS Ranges
-      </a>
-      <a href="/ratecard" class="<%= active === 'ratecard' ? 'active' : '' %>">
-        <span class="nav-icon">&#9632;</span> SMS RateCard
+      <div class="nav-group">
+        <div class="nav-group-title" onclick="toggleGroup(this)">
+          <span class="nav-icon">&#9632;</span> SMS Module <span class="arrow">▼</span>
+        </div>
+        <div class="nav-group-items">
+          <a href="/ranges" class="<%= active === 'ranges' ? 'active' : '' %>">SMS Ranges</a>
+          <a href="/numbers" class="<%= active === 'numbers' ? 'active' : '' %>">My Numbers</a>
+          <a href="/ratecard" class="<%= active === 'ratecard' ? 'active' : '' %>">SMS RateCard</a>
+        </div>
+      </div>
+      <a href="/news" class="<%= active === 'news' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> News for Clients
       </a>
       <a href="/clients" class="<%= active === 'clients' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> My Agents
       </a>
-      <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
-        <span class="nav-icon">&#9632;</span> SMS Test Panel
-      </a>
-      <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">
-        <span class="nav-icon">&#9632;</span> Reports
-      </a>
+      <div class="nav-group">
+        <div class="nav-group-title" onclick="toggleGroup(this)">
+          <span class="nav-icon">&#9632;</span> SMS CDR & Stats <span class="arrow">▼</span>
+        </div>
+        <div class="nav-group-items">
+          <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">Detailed Reports</a>
+        </div>
+      </div>
       <a href="/credit-notes" class="<%= active === 'creditnotes' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> Credit Notes
       </a>
@@ -59,8 +80,8 @@
       <a href="/statements" class="<%= active === 'statements' ? 'active' : '' %>">
         <span class="nav-icon">&#9632;</span> Statements
       </a>
-      <a href="/news" class="<%= active === 'news' ? 'active' : '' %>">
-        <span class="nav-icon">&#9632;</span> News for Clients
+      <a href="/sms-test" class="<%= active === 'smstest' ? 'active' : '' %>">
+        <span class="nav-icon">&#9632;</span> SMS Test Panel
       </a>
       <% if (user.role === 'superadmin') { %>
       <a href="/user-management" class="<%= active === 'usermgmt' ? 'active' : '' %>">
@@ -77,3 +98,12 @@
     </a>
   </nav>
 </aside>
+
+<script>
+function toggleGroup(el) {
+  var items = el.nextElementSibling;
+  items.classList.toggle('open');
+  var arrow = el.querySelector('.arrow');
+  arrow.textContent = items.classList.contains('open') ? '▲' : '▼';
+}
+</script>
