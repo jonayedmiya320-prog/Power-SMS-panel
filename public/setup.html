@@ -1,0 +1,85 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Power SMS | Setup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-title">⚙️ Power SMS Setup</div>
+    <p style="color:#aaa;font-size:12px;text-align:center;margin-bottom:20px;">First time setup. Create your admin account.</p>
+    <div class="login-err" id="err"></div>
+    <div class="lf-wrap">
+      <i class="fa fa-envelope lf-icon"></i>
+      <input class="lf-input" type="email" id="email" placeholder="Admin Email">
+    </div>
+    <div class="lf-wrap">
+      <i class="fa fa-lock lf-icon"></i>
+      <input class="lf-input" type="password" id="pass" placeholder="Password (min 6 characters)">
+    </div>
+    <div class="lf-wrap">
+      <i class="fa fa-lock lf-icon"></i>
+      <input class="lf-input" type="password" id="pass2" placeholder="Confirm Password">
+    </div>
+    <button class="btn-login" id="setupBtn" onclick="doSetup()">CREATE ADMIN ACCOUNT</button>
+  </div>
+</div>
+
+<script type="module">
+import { auth } from '/js/firebase-config.js';
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+window.doSetup = async function() {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const pass2 = document.getElementById('pass2').value;
+  const err = document.getElementById('err');
+  const btn = document.getElementById('setupBtn');
+
+  err.style.display = 'none';
+
+  if (!email) { showErr('Email is required.'); return; }
+  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+  if (pass !== pass2) { showErr('Passwords do not match.'); return; }
+
+  btn.textContent = 'Creating...';
+  btn.disabled = true;
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const token = await cred.user.getIdToken();
+
+    const res = await fetch('/api/setup/complete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      showErr(data.error || 'Setup failed.');
+      btn.textContent = 'CREATE ADMIN ACCOUNT';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    showErr(e.message);
+    btn.textContent = 'CREATE ADMIN ACCOUNT';
+    btn.disabled = false;
+  }
+
+  function showErr(msg) {
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+};
+</script>
+</body>
+</html>
