@@ -3,29 +3,33 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files from 'public' (NOT 'frontend/public')
-app.use(express.static(path.join(__dirname, 'public')));
+// ===== গুরুত্বপূর্ণ: পাথ ঠিক করুন =====
+// যেহেতু server.js আছে backend/ ফোল্ডারে, তাই এক লেভেল উপরে গিয়ে public খুঁজতে হবে
+const publicPath = path.join(__dirname, '..', 'public');
 
-// ===== ROUTES - Clean URLs (no .html) =====
+// Serve static files
+app.use(express.static(publicPath));
+
+// ===== Routes - Clean URLs =====
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/login.html'));
+    res.sendFile(path.join(publicPath, 'login.html'));
 });
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/login.html'));
+    res.sendFile(path.join(publicPath, 'login.html'));
 });
 app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/register.html'));
+    res.sendFile(path.join(publicPath, 'register.html'));
 });
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/dashboard.html'));
+    res.sendFile(path.join(publicPath, 'dashboard.html'));
 });
 
-// Catch-all: if route not found, go to login
+// Catch-all
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/login.html'));
+    res.sendFile(path.join(publicPath, 'login.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📌 Clean URLs active (no .html)`);
+    console.log(`📁 Serving files from: ${publicPath}`);
 });
