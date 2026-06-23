@@ -28,7 +28,6 @@
             color: #0068a3;
         }
 
-        /* ===== LOGIN PAGE ===== */
         #login-page {
             display: flex;
             align-items: center;
@@ -208,14 +207,14 @@
             const errorEl = document.getElementById('loginError');
 
             if (captchaAnswer !== num1 + num2) {
-                errorEl.textContent = 'Invalid captcha! Please try again.';
+                errorEl.textContent = '❌ Invalid captcha! Please try again.';
                 errorEl.style.display = 'block';
                 generateCaptcha();
                 return;
             }
 
             if (!username || !password) {
-                errorEl.textContent = 'Please enter username and password.';
+                errorEl.textContent = '❌ Please enter username and password.';
                 errorEl.style.display = 'block';
                 return;
             }
@@ -243,7 +242,11 @@
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
-                errorEl.textContent = err.message || 'Login failed!';
+                console.error('Login error:', err);
+                
+                // ===== USER-FRIENDLY MESSAGE =====
+                // Firebase technical errors are hidden from user
+                errorEl.textContent = '❌ Invalid username or password. Please try again.';
                 errorEl.style.display = 'block';
                 generateCaptcha();
                 btn.textContent = 'LOGIN';
