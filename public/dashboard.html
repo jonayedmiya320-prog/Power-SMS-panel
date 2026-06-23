@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title>Power SMS | Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* ===== COMPLETE FLEXSMS STYLES (YOUR EXACT DESIGN) ===== */
+        /* ===== RESET & BASE ===== */
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         body {
             font-family: Arial, sans-serif;
@@ -38,12 +38,12 @@
             right: 0;
             z-index: 1000;
             height: 46px;
-            background: rgb(0, 108, 169);
-            background: linear-gradient(to bottom, rgba(0, 108, 169, 1) 0%, rgba(0, 78, 122, 1) 100%);
+            background: #0068a3;
+            background: linear-gradient(to bottom, #0068a3, #004e7a);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 10px;
+            padding: 0 12px;
         }
         .tb-left {
             display: flex;
@@ -54,23 +54,12 @@
             color: #fff;
             font-size: 16px;
             font-weight: bold;
-            letter-spacing: .5px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
-        .tb-brand-ico {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .tb-brand-ico i {
-            color: #fff;
-            font-size: 16px;
+        .tb-brand i {
+            font-size: 18px;
         }
         .hamburger {
             background: none;
@@ -196,8 +185,8 @@
             color: #eee;
             font-size: 12px;
             border-bottom: #002e48 1px solid;
-            background: rgb(0, 108, 169);
-            background: linear-gradient(to bottom, rgba(0, 108, 169, 1) 0%, rgba(0, 78, 122, 1) 100%);
+            background: #0068a3;
+            background: linear-gradient(to bottom, #0068a3, #004e7a);
             box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset;
             cursor: pointer;
         }
@@ -486,10 +475,6 @@
             background: #5cb85c;
             color: #fff;
         }
-        .lbl-default {
-            background: #999;
-            color: #fff;
-        }
 
         /* ===== BUTTONS ===== */
         .btn {
@@ -504,24 +489,16 @@
             text-align: center;
         }
         .btn-pr {
-            background: linear-gradient(to bottom, rgba(0, 108, 169, 1), rgba(0, 78, 122, 1));
+            background: linear-gradient(to bottom, #0068a3, #004e7a);
             color: #fff;
             border-color: #003d5e;
         }
         .btn-pr:hover {
-            background: linear-gradient(to bottom, rgba(0, 90, 140, 1), rgba(0, 60, 100, 1));
+            background: linear-gradient(to bottom, #005a8c, #003c64);
         }
         .btn-xs {
             padding: 2px 6px;
             font-size: 11px;
-        }
-        .btn-dn {
-            background: #d9534f;
-            color: #fff;
-            border-color: #c9302c;
-        }
-        .btn-dn:hover {
-            background: #c9302c;
         }
 
         /* ===== PAGER ===== */
@@ -544,6 +521,16 @@
         .pgr:hover {
             background: linear-gradient(to bottom, #e8e8e8, #c8c8c8);
         }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sum-item {
+                flex-wrap: wrap;
+            }
+            .dash-grid-row {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -553,10 +540,7 @@
         <div class="tb-left">
             <button class="hamburger" onclick="toggleSB()">&#9776;</button>
             <div class="tb-brand">
-                <div class="tb-brand-ico">
-                    <i class="fa fa-sms"></i>
-                </div>
-                Power SMS
+                <i class="fa fa-sms"></i> Power SMS
             </div>
         </div>
         <div class="tb-right">
@@ -576,7 +560,7 @@
     <!-- ===== SIDEBAR ===== -->
     <div id="sidebar">
         <div class="sb-info">
-            Welcome <b id="sbU">User</b><br>
+            Welcome <b id="sbU">User</b><br />
             <b>Agent Panel</b>
         </div>
         <ul class="side-nav">
@@ -665,8 +649,8 @@
                     <button class="pgr">Next</button><button class="pgr">Last</button>
                 </div>
                 <table class="tbl" style="width:100%;">
-                    <thead><tr><th>Date <span class="sa">&#9650;&#9660;</span></th><th>Headline <span class="sa">&#9650;&#9660;</span></th><th>News <span class="sa">&#9650;&#9660;</span></th></tr></thead>
-                    <tbody id="nTb"><tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No data available in table</td></tr></tbody>
+                    <thead><tr><th>Date</th><th>Headline</th><th>News</th></tr></thead>
+                    <tbody id="nTb"><tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No data available</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -682,16 +666,8 @@
                     <button class="pgr">Next</button><button class="pgr">Last</button>
                 </div>
                 <table class="tbl" style="width:100%;">
-                    <thead>
-                        <tr>
-                            <th>Username <span class="sa">&#9650;&#9660;</span></th>
-                            <th>Email <span class="sa">&#9650;&#9660;</span></th>
-                            <th>Status <span class="sa">&#9650;&#9660;</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="cTb">
-                        <tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No clients yet.</td></tr>
-                    </tbody>
+                    <thead><tr><th>Username</th><th>Email</th><th>Status</th></tr></thead>
+                    <tbody id="cTb"><tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No clients yet.</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -699,16 +675,28 @@
     </div>
 
     <!-- ===== FIREBASE + LOGIC ===== -->
-    <script src="js/firebase-config.js"></script>
     <script>
         // =============================================
-        // FIREBASE CONFIG (already in firebase-config.js)
+        // FIREBASE CONFIG
         // =============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmG269FY90tV6pWZmmcUssxcMXiPgmCB8",
+            authDomain: "power-sms-60eea.firebaseapp.com",
+            projectId: "power-sms-60eea",
+            storageBucket: "power-sms-60eea.firebasestorage.app",
+            messagingSenderId: "757262497754",
+            appId: "1:757262497754:web:8f14c7ee78604298b1f2e3"
+        };
 
-        // ===== CHECK AUTH =====
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // =============================================
+        // CHECK AUTH
+        // =============================================
         const userUID = localStorage.getItem('userUID');
         const userName = localStorage.getItem('userName') || 'User';
-        const userRole = localStorage.getItem('userRole');
 
         if (!userUID) {
             window.location.href = 'login.html';
@@ -717,7 +705,9 @@
         document.getElementById('tbU').textContent = userName;
         document.getElementById('sbU').textContent = userName;
 
-        // ===== LOGOUT =====
+        // =============================================
+        // LOGOUT
+        // =============================================
         async function logoutUser() {
             try {
                 await auth.signOut();
@@ -728,7 +718,9 @@
             }
         }
 
-        // ===== SIDEBAR =====
+        // =============================================
+        // SIDEBAR
+        // =============================================
         function toggleSB() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sb-overlay').classList.toggle('on');
@@ -738,7 +730,9 @@
             document.getElementById('sb-overlay').classList.remove('on');
         }
 
-        // ===== DROPDOWN =====
+        // =============================================
+        // DROPDOWN
+        // =============================================
         function toggleDrop(e) {
             e.stopPropagation();
             document.getElementById('tbDrop').classList.toggle('open');
@@ -747,7 +741,9 @@
             document.getElementById('tbDrop').classList.remove('open');
         });
 
-        // ===== SPARKLINES =====
+        // =============================================
+        // SPARKLINES
+        // =============================================
         function drawSpark(id, data) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -761,7 +757,9 @@
             });
         }
 
-        // ===== LOAD DASHBOARD DATA =====
+        // =============================================
+        // LOAD DASHBOARD DATA
+        // =============================================
         async function loadDashboard() {
             try {
                 // Clients
@@ -838,7 +836,9 @@
             }
         }
 
-        // ===== INIT =====
+        // =============================================
+        // INIT
+        // =============================================
         loadDashboard();
     </script>
 
