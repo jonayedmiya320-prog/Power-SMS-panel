@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta charset="utf-8">
     <title>Power SMS | Dashboard</title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-
-    <!-- Chart.js -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 
     <!-- Firebase SDK -->
@@ -17,11 +13,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* ===== RESET & BASE ===== */
+        /* ===== COMPLETE FLEXSMS STYLES (YOUR EXACT DESIGN) ===== */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
         body {
             font-family: Arial, sans-serif;
@@ -288,9 +284,9 @@
             background: linear-gradient(to bottom, #f0f8ff, #ddeeff);
         }
         .dash-cell i {
+            display: block;
             font-size: 36px;
             color: #0068a3;
-            display: block;
             margin: 0 auto 10px;
         }
         .dash-cell .dc-lbl {
@@ -490,6 +486,10 @@
             background: #5cb85c;
             color: #fff;
         }
+        .lbl-default {
+            background: #999;
+            color: #fff;
+        }
 
         /* ===== BUTTONS ===== */
         .btn {
@@ -515,6 +515,14 @@
             padding: 2px 6px;
             font-size: 11px;
         }
+        .btn-dn {
+            background: #d9534f;
+            color: #fff;
+            border-color: #c9302c;
+        }
+        .btn-dn:hover {
+            background: #c9302c;
+        }
 
         /* ===== PAGER ===== */
         .pager-row {
@@ -535,16 +543,6 @@
         }
         .pgr:hover {
             background: linear-gradient(to bottom, #e8e8e8, #c8c8c8);
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .sum-item {
-                flex-wrap: wrap;
-            }
-            .dash-grid-row {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -578,7 +576,7 @@
     <!-- ===== SIDEBAR ===== -->
     <div id="sidebar">
         <div class="sb-info">
-            Welcome <b id="sbU">User</b><br />
+            Welcome <b id="sbU">User</b><br>
             <b>Agent Panel</b>
         </div>
         <ul class="side-nav">
@@ -603,26 +601,11 @@
         <!-- ===== DASHBOARD ICON GRID ===== -->
         <div class="dash-grid">
             <div class="dash-grid-row">
-                <div class="dash-cell">
-                    <i class="fa fa-tachometer"></i>
-                    <span class="dc-lbl">Dashboard</span>
-                </div>
-                <div class="dash-cell">
-                    <i class="fa fa-list-ul"></i>
-                    <span class="dc-lbl">Ranges</span>
-                </div>
-                <div class="dash-cell">
-                    <i class="fa fa-users"></i>
-                    <span class="dc-lbl">Clients</span>
-                </div>
-                <div class="dash-cell">
-                    <i class="fa fa-bar-chart"></i>
-                    <span class="dc-lbl">Statistics</span>
-                </div>
-                <div class="dash-cell">
-                    <i class="fa fa-phone"></i>
-                    <span class="dc-lbl">My Numbers</span>
-                </div>
+                <div class="dash-cell"><i class="fa fa-tachometer"></i><span class="dc-lbl">Dashboard</span></div>
+                <div class="dash-cell"><i class="fa fa-list-ul"></i><span class="dc-lbl">Ranges</span></div>
+                <div class="dash-cell"><i class="fa fa-users"></i><span class="dc-lbl">Clients</span></div>
+                <div class="dash-cell"><i class="fa fa-bar-chart"></i><span class="dc-lbl">Statistics</span></div>
+                <div class="dash-cell"><i class="fa fa-phone"></i><span class="dc-lbl">My Numbers</span></div>
             </div>
         </div>
 
@@ -631,30 +614,21 @@
             <div class="stat-card">
                 <div class="sc-left">
                     <div class="spark-box" id="sp1"></div>
-                    <div class="sc-info">
-                        <div class="sc-lbl">Today SMS</div>
-                        <div class="sc-val" id="todaySms">0</div>
-                    </div>
+                    <div class="sc-info"><div class="sc-lbl">Today SMS</div><div class="sc-val" id="todaySms">0</div></div>
                 </div>
                 <div class="sc-arrow"><i class="fa fa-arrow-up"></i></div>
             </div>
             <div class="stat-card">
                 <div class="sc-left">
                     <div class="spark-box" id="sp2"></div>
-                    <div class="sc-info">
-                        <div class="sc-lbl">Last 7 Days SMS</div>
-                        <div class="sc-val" id="weekSms">0</div>
-                    </div>
+                    <div class="sc-info"><div class="sc-lbl">Last 7 Days SMS</div><div class="sc-val" id="weekSms">0</div></div>
                 </div>
                 <div class="sc-arrow"><i class="fa fa-arrow-up"></i></div>
             </div>
             <div class="stat-card">
                 <div class="sc-left">
                     <div class="spark-box" id="sp3"></div>
-                    <div class="sc-info">
-                        <div class="sc-lbl">Last 30 Days SMS</div>
-                        <div class="sc-val" id="monthSms">0</div>
-                    </div>
+                    <div class="sc-info"><div class="sc-lbl">Last 30 Days SMS</div><div class="sc-val" id="monthSms">0</div></div>
                 </div>
                 <div class="sc-arrow"><i class="fa fa-arrow-up"></i></div>
             </div>
@@ -670,24 +644,30 @@
         <div class="sum-list">
             <div class="sum-item">
                 <div class="sum-circle"><i class="fa fa-users"></i></div>
-                <div>
-                    <div class="sum-num" id="totalClients">0</div>
-                    <div class="sum-lbl">TOTAL CLIENTS</div>
-                </div>
+                <div><div class="sum-num" id="totalClients">0</div><div class="sum-lbl">TOTAL CLIENTS</div></div>
             </div>
             <div class="sum-item">
                 <div class="sum-circle"><i class="fa fa-phone"></i></div>
-                <div>
-                    <div class="sum-num" id="totalRanges">0</div>
-                    <div class="sum-lbl">TOTAL RANGES</div>
-                </div>
+                <div><div class="sum-num" id="totalRanges">0</div><div class="sum-lbl">TOTAL RANGES</div></div>
             </div>
             <div class="sum-item">
                 <div class="sum-circle"><i class="fa fa-envelope"></i></div>
-                <div>
-                    <div class="sum-num" id="totalSms">0</div>
-                    <div class="sum-lbl">TOTAL SMS</div>
+                <div><div class="sum-num" id="totalSms">0</div><div class="sum-lbl">TOTAL SMS</div></div>
+            </div>
+        </div>
+
+        <!-- ===== NEWS & NOTIFICATIONS ===== -->
+        <div class="wblock">
+            <div class="whead"><h5><i class="fa fa-bell-o"></i> NEWS &amp; NOTIFICATIONS</h5></div>
+            <div class="wbody">
+                <div class="pager-row">
+                    <button class="pgr">First</button><button class="pgr">Previous</button>
+                    <button class="pgr">Next</button><button class="pgr">Last</button>
                 </div>
+                <table class="tbl" style="width:100%;">
+                    <thead><tr><th>Date <span class="sa">&#9650;&#9660;</span></th><th>Headline <span class="sa">&#9650;&#9660;</span></th><th>News <span class="sa">&#9650;&#9660;</span></th></tr></thead>
+                    <tbody id="nTb"><tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No data available in table</td></tr></tbody>
+                </table>
             </div>
         </div>
 
@@ -697,18 +677,20 @@
                 <h5><i class="fa fa-users"></i> RECENT CLIENTS</h5>
             </div>
             <div class="wbody">
-                <table class="tbl tbl-str">
+                <div class="pager-row">
+                    <button class="pgr">First</button><button class="pgr">Previous</button>
+                    <button class="pgr">Next</button><button class="pgr">Last</button>
+                </div>
+                <table class="tbl" style="width:100%;">
                     <thead>
                         <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Status</th>
+                            <th>Username <span class="sa">&#9650;&#9660;</span></th>
+                            <th>Email <span class="sa">&#9650;&#9660;</span></th>
+                            <th>Status <span class="sa">&#9650;&#9660;</span></th>
                         </tr>
                     </thead>
-                    <tbody id="clientTable">
-                        <tr>
-                            <td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No clients yet.</td>
-                        </tr>
+                    <tbody id="cTb">
+                        <tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No clients yet.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -716,27 +698,14 @@
 
     </div>
 
-    <!-- ===== JAVASCRIPT ===== -->
+    <!-- ===== FIREBASE + LOGIC ===== -->
+    <script src="js/firebase-config.js"></script>
     <script>
         // =============================================
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG (already in firebase-config.js)
         // =============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyCmG269FY90tV6pWZmmcUssxcMXiPgmCB8",
-            authDomain: "power-sms-60eea.firebaseapp.com",
-            projectId: "power-sms-60eea",
-            storageBucket: "power-sms-60eea.firebasestorage.app",
-            messagingSenderId: "757262497754",
-            appId: "1:757262497754:web:8f14c7ee78604298b1f2e3"
-        };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // =============================================
-        // CHECK AUTH
-        // =============================================
+        // ===== CHECK AUTH =====
         const userUID = localStorage.getItem('userUID');
         const userName = localStorage.getItem('userName') || 'User';
         const userRole = localStorage.getItem('userRole');
@@ -748,9 +717,7 @@
         document.getElementById('tbU').textContent = userName;
         document.getElementById('sbU').textContent = userName;
 
-        // =============================================
-        // LOGOUT
-        // =============================================
+        // ===== LOGOUT =====
         async function logoutUser() {
             try {
                 await auth.signOut();
@@ -761,22 +728,17 @@
             }
         }
 
-        // =============================================
-        // SIDEBAR
-        // =============================================
+        // ===== SIDEBAR =====
         function toggleSB() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sb-overlay').classList.toggle('on');
         }
-
         function closeSB() {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sb-overlay').classList.remove('on');
         }
 
-        // =============================================
-        // DROPDOWN
-        // =============================================
+        // ===== DROPDOWN =====
         function toggleDrop(e) {
             e.stopPropagation();
             document.getElementById('tbDrop').classList.toggle('open');
@@ -785,9 +747,7 @@
             document.getElementById('tbDrop').classList.remove('open');
         });
 
-        // =============================================
-        // SPARKLINES
-        // =============================================
+        // ===== SPARKLINES =====
         function drawSpark(id, data) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -801,40 +761,36 @@
             });
         }
 
-        // =============================================
-        // LOAD DASHBOARD DATA
-        // =============================================
+        // ===== LOAD DASHBOARD DATA =====
         async function loadDashboard() {
             try {
-                // Get clients count
+                // Clients
                 const clientsSnap = await db.collection('clients').get();
-                const totalClients = clientsSnap.size;
-                document.getElementById('totalClients').textContent = totalClients;
+                document.getElementById('totalClients').textContent = clientsSnap.size;
 
-                // Get ranges count
+                // Ranges
                 const rangesSnap = await db.collection('smsRanges').get();
                 document.getElementById('totalRanges').textContent = rangesSnap.size;
 
-                // Get total SMS (example)
+                // SMS Logs
                 const smsSnap = await db.collection('smsLogs').get();
                 document.getElementById('totalSms').textContent = smsSnap.size || 0;
 
-                // Get recent clients
+                // Recent clients table
                 let clientsHtml = '';
                 if (clientsSnap.empty) {
-                    clientsHtml =
-                        '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No clients yet.</td></tr>';
+                    clientsHtml = '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:18px;">No clients yet.</td></tr>';
                 } else {
                     clientsSnap.forEach(doc => {
                         const data = doc.data();
                         clientsHtml += `<tr>
-                                <td>${data.username || 'Unknown'}</td>
-                                <td>${data.email || '—'}</td>
-                                <td><span class="lbl lbl-success">Active</span></td>
-                            </tr>`;
+                            <td>${data.username || 'Unknown'}</td>
+                            <td>${data.email || '—'}</td>
+                            <td><span class="lbl lbl-success">Active</span></td>
+                        </tr>`;
                     });
                 }
-                document.getElementById('clientTable').innerHTML = clientsHtml;
+                document.getElementById('cTb').innerHTML = clientsHtml;
 
                 // Sparklines
                 drawSpark('sp1', [8, 4, 6, 5, 9, 3, 0]);
@@ -882,9 +838,7 @@
             }
         }
 
-        // =============================================
-        // INIT
-        // =============================================
+        // ===== INIT =====
         loadDashboard();
     </script>
 
