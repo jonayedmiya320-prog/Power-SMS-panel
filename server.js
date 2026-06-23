@@ -113,19 +113,50 @@ app.get('/api/ranges', verifyToken, async (req, res) => {
   }
 });
 
+app.post('/api/ranges', verifyToken, async (req, res) => {
+  try {
+    const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+    const ref = await db.collection('ranges').add(data);
+    res.json({ id: ref.id });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/ranges/:id', verifyToken, async (req, res) => {
+  try {
+    await db.collection('ranges').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== MY NUMBERS API =====
+app.get('/api/numbers', verifyToken, async (req, res) => {
+  try {
+    const snap = await db.collection('numbers').orderBy('createdAt', 'desc').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ===== STATS API =====
 app.get('/api/stats', verifyToken, async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0,0,0,0);
+    const last7 = new Date(); last7.setDate(last7.getDate()-7);
+    const last30 = new Date(); last30.setDate(last30.getDate()-30);
     const snap = await db.collection('sms_logs').get();
     const all = snap.docs.map(d => d.data());
     const todaySms = all.filter(s => s.createdAt?.toDate() >= today).length;
-    const last7 = new Date(); last7.setDate(last7.getDate()-7);
     const last7Sms = all.filter(s => s.createdAt?.toDate() >= last7).length;
-    const last30 = new Date(); last30.setDate(last30.getDate()-30);
     const last30Sms = all.filter(s => s.createdAt?.toDate() >= last30).length;
-    res.json({ todaySms, last7Sms, last30Sms, totalClients: (await db.collection('clients').get()).size });
+    const totalClients = (await db.collection('clients').get()).size;
+    const totalRanges = (await db.collection('ranges').get()).size;
+    res.json({ todaySms, last7Sms, last30Sms, totalClients, totalRanges });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -174,7 +205,74 @@ app.get('/api/activity', verifyToken, async (req, res) => {
   }
 });
 
-// ===== FALLBACK =====
+// ===== CREDIT NOTES API =====
+app.get('/api/creditnotes', verifyToken, async (req, res) => {
+  try {
+    const snap = await db.collection('creditnotes').orderBy('createdAt', 'desc').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== BANK ACCOUNTS API =====
+app.get('/api/bankaccounts', verifyToken, async (req, res) => {
+  try {
+    const snap = await db.collection('bankaccounts').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/bankaccounts', verifyToken, async (req, res) => {
+  try {
+    const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+    const ref = await db.collection('bankaccounts').add(data);
+    res.json({ id: ref.id });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== PROFILE API =====
+app.get('/api/profile', verifyToken, async (req, res) => {
+  try {
+    const doc = await db.collection('users').doc(req.user.uid).get();
+    res.json(doc.exists ? doc.data() : {});
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put('/api/profile', verifyToken, async (req, res) => {
+  try {
+    await db.collection('users').doc(req.user.uid).set(req.body, { merge: true });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== PAGE ROUTES (no .html in URL) =====
+const pages = [
+  'dashboard','clients','smsranges','mynumbers','ratecard',
+  'liveaccess','detailedreports','summaryreports','clientstats',
+  'rangestats','numberstats','creditnotes','payments','bankaccounts',
+  'statements','newsmaster','smstest','voicetest','notifications',
+  'profile','myactivity','useractivity'
+];
+
+pages.forEach(page => {
+  app.get('/' + page, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', page + '.html'));
+  });
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
