@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title>Power SMS | Login</title>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -22,232 +19,145 @@
         }
         body {
             font-family: Arial, sans-serif;
-            background: #f0f4f8;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 13px;
+            background: #eee;
+            color: #333;
         }
         a {
             text-decoration: none;
             color: #0068a3;
         }
 
-        /* ===== LOGIN CONTAINER ===== */
-        .login-container {
-            background: #ffffff;
-            padding: 40px 32px;
-            border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 400px;
-        }
-        .login-container .logo {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-        .login-container .logo h1 {
-            font-size: 26px;
-            font-weight: 700;
-            color: #0b2b4a;
-        }
-        .login-container .logo p {
-            color: #6b7a8f;
-            font-size: 14px;
-            margin-top: 4px;
-        }
-
-        /* ===== ERROR ===== */
-        .error-msg {
-            background: #ffe9e9;
-            color: #b33c3c;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        /* ===== INPUT GROUP ===== */
-        .input-group {
-            margin-bottom: 18px;
-        }
-        .input-group label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1e2f44;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .input-wrap {
-            display: flex;
-            align-items: center;
-            background: #f0f3f8;
-            border-radius: 10px;
-            padding: 0 14px;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }
-        .input-wrap:focus-within {
-            border-color: #2a7de1;
-            background: #fff;
-        }
-        .input-wrap i {
-            color: #8a9bb5;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-        .input-wrap input {
-            border: none;
-            background: transparent;
-            padding: 14px 0;
-            font-size: 14px;
-            width: 100%;
-            outline: none;
-            font-family: Arial, sans-serif;
-        }
-
-        /* ===== CAPTCHA ===== */
-        .captcha-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #f0f3f8;
-            padding: 10px 14px;
-            border-radius: 10px;
-            margin-bottom: 22px;
-        }
-        .captcha-row span {
-            font-weight: 600;
-            font-size: 15px;
-            color: #0b2b4a;
-        }
-        .captcha-row input {
-            border: none;
-            background: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            width: 80px;
-            font-size: 14px;
-            outline: 1px solid #dce1e9;
-            font-family: Arial, sans-serif;
-        }
-        .captcha-row input:focus {
-            outline-color: #2a7de1;
-        }
-
-        /* ===== BUTTON ===== */
-        .btn-login {
-            width: 100%;
-            background: #0b2b4a;
-            color: #fff;
-            border: none;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: Arial, sans-serif;
+        /* ===== LOGIN PAGE ===== */
+        #login-page {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            min-height: 100vh;
+            background: linear-gradient(170deg, #8faab8 0%, #607d8b 45%, #455a64 100%);
+        }
+        .login-box {
+            background: #0d1f3c;
+            border-radius: 18px;
+            padding: 38px 28px 34px;
+            width: 340px;
+            max-width: 94vw;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+        }
+        .login-err {
+            background: rgba(220, 50, 50, .18);
+            border: 1px solid rgba(220, 80, 80, .35);
+            color: #ff8080;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            display: none;
+        }
+        .lf-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .lf-wrap .lf-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+        }
+        .lf-input {
+            width: 100%;
+            background: #e6e6e6;
+            border: none;
+            border-radius: 28px;
+            padding: 13px 16px 13px 42px;
+            font-size: 14px;
+            color: #555;
+            outline: none;
+            display: block;
+        }
+        .lf-input:focus {
+            background: #ddd;
+        }
+        .captcha-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .captcha-line input {
+            background: #fff;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 13px;
+            width: 90px;
+            outline: none;
+            color: #333;
+        }
+        .btn-login {
+            width: 100%;
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 28px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            cursor: pointer;
         }
         .btn-login:hover {
-            background: #1a3f62;
+            background: #43a047;
         }
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* ===== SETUP LINK ===== */
         .setup-link {
             text-align: center;
-            margin-top: 18px;
-            font-size: 13px;
+            margin-top: 14px;
+            font-size: 12px;
         }
         .setup-link a {
-            color: #2a7de1;
-            font-weight: 500;
+            color: #6CF;
+            text-decoration: none;
         }
         .setup-link a:hover {
             text-decoration: underline;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 28px 20px;
-                margin: 0 12px;
-            }
-            .login-container .logo h1 {
-                font-size: 22px;
-            }
-            .captcha-row {
-                flex-wrap: wrap;
-            }
-            .captcha-row input {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
+    <div id="login-page">
+        <div class="login-box">
+            <div class="login-err" id="loginError">Invalid username or password!</div>
 
-        <!-- Logo -->
-        <div class="logo">
-            <h1>🔐 Power SMS</h1>
-            <p>Login to your dashboard</p>
-        </div>
+            <div class="lf-wrap">
+                <i class="fa fa-user lf-icon"></i>
+                <input class="lf-input" type="text" id="loginUsername" placeholder="Username" />
+            </div>
 
-        <!-- Error Message -->
-        <div class="error-msg" id="loginError">Invalid username or password!</div>
+            <div class="lf-wrap">
+                <i class="fa fa-lock lf-icon"></i>
+                <input class="lf-input" type="password" id="loginPassword" placeholder="Password" />
+            </div>
 
-        <!-- Username -->
-        <div class="input-group">
-            <label>Username</label>
-            <div class="input-wrap">
-                <i class="fa fa-user"></i>
-                <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="username" />
+            <div class="captcha-line">
+                <span id="captchaQuestion">What is 0 + 1 = ?</span>
+                <input type="text" id="captchaInput" placeholder="Answer" />
+            </div>
+
+            <button class="btn-login" id="loginBtn">LOGIN</button>
+
+            <div class="setup-link">
+                <a href="#" id="setupLink" style="display: none;">Create Super Admin Account</a>
             </div>
         </div>
-
-        <!-- Password -->
-        <div class="input-group">
-            <label>Password</label>
-            <div class="input-wrap">
-                <i class="fa fa-lock"></i>
-                <input type="password" id="loginPassword" placeholder="Enter your password" />
-            </div>
-        </div>
-
-        <!-- Captcha -->
-        <div class="captcha-row">
-            <span id="captchaQuestion">What is 0 + 1 = ?</span>
-            <input type="text" id="captchaInput" placeholder="Answer" autocomplete="off" />
-        </div>
-
-        <!-- Login Button -->
-        <button class="btn-login" id="loginBtn">
-            <i class="fa fa-sign-in"></i> Login
-        </button>
-
-        <!-- Setup Link (hidden by default) -->
-        <div class="setup-link">
-            <a href="#" id="setupLink" style="display: none;">Create Super Admin Account</a>
-        </div>
-
     </div>
 
-    <!-- ===== FIREBASE CONFIG ===== -->
     <script>
-        // =============================================
-        // FIREBASE CONFIG
-        // =============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCmG269FY90tV6pWZmmcUssxcMXiPgmCB8",
             authDomain: "power-sms-60eea.firebaseapp.com",
@@ -261,9 +171,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // =============================================
-        // CAPTCHA
-        // =============================================
         let num1 = 0,
             num2 = 1;
 
@@ -276,15 +183,11 @@
         }
         generateCaptcha();
 
-        // =============================================
-        // CHECK IF SUPER ADMIN EXISTS
-        // =============================================
         async function checkSetupStatus() {
             try {
                 const snapshot = await db.collection('users')
                     .where('role', '==', 'SUPER_ADMIN')
                     .get();
-
                 const link = document.getElementById('setupLink');
                 if (snapshot.empty) {
                     link.style.display = 'block';
@@ -298,70 +201,56 @@
         }
         checkSetupStatus();
 
-        // =============================================
-        // LOGIN
-        // =============================================
         document.getElementById('loginBtn').addEventListener('click', async function() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
             const captchaAnswer = parseInt(document.getElementById('captchaInput').value, 10);
             const errorEl = document.getElementById('loginError');
 
-            // Validate captcha
             if (captchaAnswer !== num1 + num2) {
-                errorEl.textContent = '❌ Invalid captcha! Please try again.';
+                errorEl.textContent = 'Invalid captcha! Please try again.';
                 errorEl.style.display = 'block';
                 generateCaptcha();
                 return;
             }
 
-            // Validate fields
             if (!username || !password) {
-                errorEl.textContent = '❌ Please enter username and password.';
+                errorEl.textContent = 'Please enter username and password.';
                 errorEl.style.display = 'block';
                 return;
             }
 
             const btn = document.getElementById('loginBtn');
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Logging in...';
+            btn.textContent = 'LOGGING IN...';
             btn.disabled = true;
             errorEl.style.display = 'none';
 
             try {
-                // Convert username to email format (same as registration)
                 const email = username.toLowerCase().replace(/\s/g, '') + '@powersms.local';
-
-                // Firebase login
                 const userCred = await auth.signInWithEmailAndPassword(email, password);
                 const uid = userCred.user.uid;
-
-                // Get user data from Firestore
                 const doc = await db.collection('users').doc(uid).get();
+
                 if (!doc.exists) {
                     throw new Error('User data not found.');
                 }
 
                 const data = doc.data();
-
-                // Save session
                 localStorage.setItem('userUID', uid);
                 localStorage.setItem('userRole', data.role);
                 localStorage.setItem('userName', data.username);
 
-                // Redirect to dashboard
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
-                console.error('Login error:', err);
-                errorEl.textContent = '❌ ' + (err.message || 'Login failed!');
+                errorEl.textContent = err.message || 'Login failed!';
                 errorEl.style.display = 'block';
                 generateCaptcha();
-                btn.innerHTML = '<i class="fa fa-sign-in"></i> Login';
+                btn.textContent = 'LOGIN';
                 btn.disabled = false;
             }
         });
 
-        // ===== ENTER KEY SUPPORT =====
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 document.getElementById('loginBtn').click();
