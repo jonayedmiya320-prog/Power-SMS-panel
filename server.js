@@ -297,28 +297,42 @@ app.get('/setup', async (req, res) => {
   try {
     const doc = await db.collection('settings').doc('setup').get();
     if (doc.exists && doc.data().isSetup === true) {
-      return res.redirect('/');
+      return res.redirect('/login');
     }
     res.sendFile(path.join(__dirname, 'public', 'setup.html'));
   } catch (e) {
-    res.redirect('/');
+    res.redirect('/login');
   }
 });
 
+// ===== LOGIN PAGE ROUTE =====
+app.get('/login', async (req, res) => {
+  try {
+    const doc = await db.collection('settings').doc('setup').get();
+    if (!doc.exists || doc.data().isSetup !== true) {
+      return res.redirect('/setup');
+    }
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  } catch (e) {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  }
+});
+
+// ===== ROOT REDIRECT =====
 app.get('/', async (req, res) => {
   try {
     const doc = await db.collection('settings').doc('setup').get();
     if (!doc.exists || doc.data().isSetup !== true) {
       return res.redirect('/setup');
     }
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/login');
   } catch (e) {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/login');
   }
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 const PORT = process.env.PORT || 3000;
