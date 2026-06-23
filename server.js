@@ -33,6 +33,29 @@ async function verifyToken(req, res, next) {
   }
 }
 
+// ===== SETUP CHECK API =====
+app.get('/api/setup/check', async (req, res) => {
+  try {
+    const doc = await db.collection('settings').doc('setup').get();
+    res.json({ isSetup: doc.exists && doc.data().isSetup === true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/setup/complete', async (req, res) => {
+  try {
+    const doc = await db.collection('settings').doc('setup').get();
+    if (doc.exists && doc.data().isSetup === true) {
+      return res.status(403).json({ error: 'Already setup' });
+    }
+    await db.collection('settings').doc('setup').set({ isSetup: true });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ===== CLIENTS API =====
 app.get('/api/clients', verifyToken, async (req, res) => {
   try {
@@ -254,7 +277,7 @@ app.put('/api/profile', verifyToken, async (req, res) => {
   }
 });
 
-// ===== PAGE ROUTES (no .html in URL) =====
+// ===== PAGE ROUTES =====
 const pages = [
   'dashboard','clients','smsranges','mynumbers','ratecard',
   'liveaccess','detailedreports','summaryreports','clientstats',
@@ -269,8 +292,29 @@ pages.forEach(page => {
   });
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// ===== SETUP PAGE ROUTE =====
+app.get('/setup', async (req, res) => {
+  try {
+    const doc = await db.collection('settings').doc('setup').get();
+    if (doc.exists && doc.data().isSetup === true) {
+      return res.redirect('/');
+    }
+    res.sendFile(path.join(__dirname, 'public', 'setup.html'));
+  } catch (e) {
+    res.redirect('/');
+  }
+});
+
+app.get('/', async (req, res) => {
+  try {
+    const doc = await db.collection('settings').doc('setup').get();
+    if (!doc.exists || doc.data().isSetup !== true) {
+      return res.redirect('/setup');
+    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } catch (e) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
 });
 
 app.get('*', (req, res) => {
