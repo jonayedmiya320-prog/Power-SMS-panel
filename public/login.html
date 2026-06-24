@@ -6,25 +6,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+<style>
+.captcha-line{
+  display:flex;align-items:center;gap:10px;
+  color:#fff;font-size:14px;font-weight:600;margin-bottom:16px;
+}
+.captcha-line input{
+  background:#fff;border:1px solid #bbb;border-radius:6px;
+  padding:8px 10px;font-size:13px;width:90px;outline:none;color:#333;
+}
+</style>
 </head>
 <body>
 <div id="login-page">
   <div class="login-box">
-    <div class="login-title">🔐 Power SMS</div>
-    <div class="login-err" id="err"></div>
+    <div class="login-err" id="lerr">Invalid username, password or captcha.</div>
     <div class="lf-wrap">
       <i class="fa fa-user lf-icon"></i>
-      <input class="lf-input" type="text" id="username" placeholder="Username" autocomplete="off">
+      <input class="lf-input" type="text" id="lu" placeholder="Username" autocomplete="off">
     </div>
     <div class="lf-wrap">
       <i class="fa fa-lock lf-icon"></i>
-      <input class="lf-input" type="password" id="pass" placeholder="Password">
+      <input class="lf-input" type="password" id="lp" placeholder="Password">
     </div>
     <div class="captcha-line">
       <span id="cq">What is 0 + 1 = ?</span>
       <input type="text" id="ca" placeholder="Answer">
     </div>
-    <button class="btn-login" id="loginBtn" onclick="doLogin()">LOGIN</button>
+    <button class="btn-login" onclick="doLogin()">LOGIN</button>
   </div>
 </div>
 
@@ -44,38 +53,38 @@ function newCaptcha() {
 newCaptcha();
 
 async function doLogin() {
-  const username = document.getElementById('username').value.trim();
-  const pass = document.getElementById('pass').value;
-  const ans = parseInt(document.getElementById('ca').value, 10);
-  const err = document.getElementById('err');
-  const btn = document.getElementById('loginBtn');
+  var u = document.getElementById('lu').value.trim();
+  var p = document.getElementById('lp').value;
+  var a = parseInt(document.getElementById('ca').value, 10);
+  var e = document.getElementById('lerr');
+  var btn = document.querySelector('.btn-login');
 
-  err.style.display = 'none';
+  e.style.display = 'none';
 
-  if (!username || !pass) { showErr('Username and password required.'); return; }
-  if (ans !== CA + CB) { showErr('Wrong captcha answer.'); newCaptcha(); return; }
+  if (!u || !p) { showErr('Username and password required.'); return; }
+  if (a !== CA + CB) { showErr('Invalid username, password or captcha.'); newCaptcha(); return; }
 
   btn.textContent = 'Logging in...';
   btn.disabled = true;
 
   try {
-    const res = await fetch('/api/login', {
+    var res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password: pass })
+      body: JSON.stringify({ username: u, password: p })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (data.token) {
       localStorage.setItem('ps_token', data.token);
       localStorage.setItem('ps_username', data.username);
       window.location.href = '/dashboard';
     } else {
-      showErr(data.error || 'Invalid credentials.');
+      showErr('Invalid username, password or captcha.');
       btn.textContent = 'LOGIN';
       btn.disabled = false;
       newCaptcha();
     }
-  } catch (e) {
+  } catch (err) {
     showErr('Server error. Try again.');
     btn.textContent = 'LOGIN';
     btn.disabled = false;
@@ -84,9 +93,9 @@ async function doLogin() {
 }
 
 function showErr(msg) {
-  const err = document.getElementById('err');
-  err.textContent = msg;
-  err.style.display = 'block';
+  var e = document.getElementById('lerr');
+  e.textContent = msg;
+  e.style.display = 'block';
 }
 
 document.addEventListener('keydown', function(e) {
