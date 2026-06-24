@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
@@ -19,13 +21,14 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
+const JWT_SECRET = process.env.JWT_SECRET || 'powersms_secret_key_2024';
 
 // ===== AUTH VERIFY MIDDLEWARE =====
-async function verifyToken(req, res, next) {
+function verifyToken(req, res, next) {
   const token = req.headers.authorization?.split('Bearer ')[1];
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (e) {
@@ -49,8 +52,31 @@ app.post('/api/setup/complete', async (req, res) => {
     if (doc.exists && doc.data().isSetup === true) {
       return res.status(403).json({ error: 'Already setup' });
     }
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    const hashed = await bcrypt.hash(password, 10);
     await db.collection('settings').doc('setup').set({ isSetup: true });
+    await db.collection('admins').doc('admin').set({ username, password: hashed });
     res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== LOGIN API =====
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+    const doc = await db.collection('admins').doc('admin').get();
+    if (!doc.exists) return res.status(401).json({ error: 'Invalid credentials' });
+    const data = doc.data();
+    if (data.username !== username) return res.status(401).json({ error: 'Invalid credentials' });
+    const match = await bcrypt.compare(password, data.password);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, username });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -60,8 +86,7 @@ app.post('/api/setup/complete', async (req, res) => {
 app.get('/api/clients', verifyToken, async (req, res) => {
   try {
     const snap = await db.collection('clients').orderBy('createdAt', 'desc').get();
-    const clients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json(clients);
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -99,8 +124,7 @@ app.delete('/api/clients/:id', verifyToken, async (req, res) => {
 app.get('/api/news', verifyToken, async (req, res) => {
   try {
     const snap = await db.collection('news').orderBy('createdAt', 'desc').get();
-    const news = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json(news);
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -129,8 +153,7 @@ app.delete('/api/news/:id', verifyToken, async (req, res) => {
 app.get('/api/ranges', verifyToken, async (req, res) => {
   try {
     const snap = await db.collection('ranges').get();
-    const ranges = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json(ranges);
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -168,8 +191,7 @@ app.get('/api/numbers', verifyToken, async (req, res) => {
 // ===== STATS API =====
 app.get('/api/stats', verifyToken, async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0,0,0,0);
     const last7 = new Date(); last7.setDate(last7.getDate()-7);
     const last30 = new Date(); last30.setDate(last30.getDate()-30);
     const snap = await db.collection('sms_logs').get();
@@ -261,8 +283,9 @@ app.post('/api/bankaccounts', verifyToken, async (req, res) => {
 // ===== PROFILE API =====
 app.get('/api/profile', verifyToken, async (req, res) => {
   try {
-    const doc = await db.collection('users').doc(req.user.uid).get();
-    res.json(doc.exists ? doc.data() : {});
+    const doc = await db.collection('admins').doc('admin').get();
+    const data = doc.data();
+    res.json({ username: data.username });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -270,7 +293,11 @@ app.get('/api/profile', verifyToken, async (req, res) => {
 
 app.put('/api/profile', verifyToken, async (req, res) => {
   try {
-    await db.collection('users').doc(req.user.uid).set(req.body, { merge: true });
+    const { username, password } = req.body;
+    const update = {};
+    if (username) update.username = username;
+    if (password) update.password = await bcrypt.hash(password, 10);
+    await db.collection('admins').doc('admin').update(update);
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
