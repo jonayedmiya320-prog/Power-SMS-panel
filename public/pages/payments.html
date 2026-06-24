@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Power SMS | Payment Requests</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-left">
+    <button class="hamburger" onclick="toggleSB()">&#9776;</button>
+    <div class="tb-brand">Power SMS</div>
+    <nav class="top-nav-links">
+      <a href="/dashboard">Dashboard</a>
+      <div class="top-nav-dd"><a href="#">IPRN SMS Module &#9662;</a>
+        <ul class="dd-menu">
+          <li><a href="/smsranges">SMS Ranges</a></li>
+          <li><a href="/mynumbers">My SMS Numbers</a></li>
+          <li><a href="/ratecard">SMS RateCard</a></li>
+        </ul>
+      </div>
+      <a href="/newsmaster">News for Clients</a>
+      <a href="/clients">My Clients</a>
+      <a href="/liveaccess">Live Access</a>
+      <div class="top-nav-dd"><a href="#">SMS CDR &amp; Stats &#9662;</a>
+        <ul class="dd-menu">
+          <li><a href="/detailedreports">Detailed SMS Reports</a></li>
+          <li><a href="/summaryreports">Summary SMS Reports</a></li>
+          <li><a href="/clientstats">Client SMS Stats</a></li>
+          <li><a href="/rangestats">SMS Range Stats</a></li>
+          <li><a href="/numberstats">SMS Number Stats</a></li>
+        </ul>
+      </div>
+      <div class="top-nav-dd"><a href="#">Statements &#9662;</a>
+        <ul class="dd-menu">
+          <li><a href="/statements?c=USD">USD Statements</a></li>
+          <li><a href="/statements?c=EUR">EUR Statements</a></li>
+          <li><a href="/statements?c=GBP">GBP Statements</a></li>
+        </ul>
+      </div>
+      <a href="/voicetest">Voice Test</a>
+      <a href="/smstest">SMS Test</a>
+    </nav>
+  </div>
+  <div class="tb-right">
+    <div class="tb-user" onclick="toggleDrop(event)"><span class="tb-dot"></span><span id="tbU"></span> &#9662;</div>
+    <ul class="tb-dropdown" id="tbDrop">
+      <li><a href="/notifications"><i class="fa fa-envelope"></i> Notifications</a></li>
+      <li><a href="/profile"><i class="fa fa-briefcase"></i> My Profile</a></li>
+      <li><a href="/myactivity"><i class="fa fa-file"></i> My Activity</a></li>
+      <li><a href="/useractivity"><i class="fa fa-pencil"></i> Users Activity</a></li>
+      <li class="sep"></li>
+      <li><a href="#" onclick="doLogout();return false;" style="color:#c0392b;font-weight:bold;"><i class="fa fa-power-off"></i> Logout</a></li>
+    </ul>
+  </div>
+</div>
+<div id="sb-overlay" onclick="closeSB()"></div>
+<div id="sidebar">
+  <div class="sb-info">Welcome <b id="sbU"></b><br><b>Agent Panel</b><br><span id="sbTime"></span></div>
+  <ul class="side-nav">
+    <li><a href="/dashboard"><i class="fa fa-desktop"></i>Dashboard</a></li>
+    <li><a href="#" onclick="toggleAC(this);return false;"><i class="fa fa-envelope"></i>IPRN SMS Module</a>
+      <ul class="acitem-side">
+        <li><a href="/smsranges"><span class="sn-dot"></span>SMS Ranges</a></li>
+        <li><a href="/mynumbers"><span class="sn-dot"></span>My SMS Numbers</a></li>
+        <li><a href="/ratecard"><span class="sn-dot"></span>SMS RateCard</a></li>
+      </ul>
+    </li>
+    <li><a href="/smstest"><i class="fa fa-rss"></i>SMS Test Panel</a></li>
+    <li><a href="/clients"><i class="fa fa-user"></i>My Clients</a></li>
+    <li><a href="/liveaccess"><i class="fa fa-desktop"></i>Live Access</a></li>
+    <li><a href="#" onclick="toggleAC(this);return false;"><i class="fa fa-bar-chart"></i>SMS CDR &amp; Statistics</a>
+      <ul class="acitem-side">
+        <li><a href="/detailedreports"><span class="sn-dot"></span>Detailed SMS Reports</a></li>
+        <li><a href="/summaryreports"><span class="sn-dot"></span>Summary SMS Reports</a></li>
+        <li><a href="/clientstats"><span class="sn-dot"></span>Client SMS Stats</a></li>
+        <li><a href="/rangestats"><span class="sn-dot"></span>SMS Range Stats</a></li>
+        <li><a href="/numberstats"><span class="sn-dot"></span>SMS Number Stats</a></li>
+      </ul>
+    </li>
+    <li><a href="/creditnotes"><i class="fa fa-briefcase"></i>My Credit Notes</a></li>
+    <li><a href="/payments" class="on"><i class="fa fa-money"></i>Payment Requests</a></li>
+    <li><a href="/bankaccounts"><i class="fa fa-bank"></i>Bank Accounts</a></li>
+    <li><a href="#" onclick="toggleAC(this);return false;"><i class="fa fa-area-chart"></i>Statements</a>
+      <ul class="acitem-side">
+        <li><a href="/statements?c=USD"><span class="sn-dot"></span>USD Statements</a></li>
+        <li><a href="/statements?c=EUR"><span class="sn-dot"></span>EUR Statements</a></li>
+        <li><a href="/statements?c=GBP"><span class="sn-dot"></span>GBP Statements</a></li>
+      </ul>
+    </li>
+    <li><a href="/newsmaster"><i class="fa fa-coffee"></i>News for Clients</a></li>
+  </ul>
+</div>
+<div id="main-content">
+  <ul class="bc"><li><a href="/dashboard">Home</a></li><li class="div">»</li><li>Payment Requests</li></ul>
+  <div class="wblock">
+    <div class="whead">
+      <h5>Payment Requests</h5>
+      <button class="btn btn-pr btn-xs" onclick="openM('pmM')">+ New Request</button>
+    </div>
+    <div class="wbody">
+      <div class="pager-row">
+        <button class="pgr">First</button><button class="pgr">Previous</button><button class="pgr">Next</button><button class="pgr">Last</button>
+      </div>
+      <div style="padding:13px;overflow-x:auto;">
+        <table class="tbl tbl-str">
+          <thead><tr>
+            <th>Date <span class="sa"></span></th>
+            <th>Amount <span class="sa"></span></th>
+            <th>Currency <span class="sa"></span></th>
+            <th>Method <span class="sa"></span></th>
+            <th>Status <span class="sa"></span></th>
+          </tr></thead>
+          <tbody id="pTb"><tr><td colspan="5" style="text-align:center;color:#aaa;padding:18px;">No payment requests</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-ov" id="pmM">
+  <div class="modal-bx">
+    <div class="mhd"><h4>New Payment Request</h4><button class="cls" onclick="closeM('pmM')">&times;</button></div>
+    <div class="mbd">
+      <div class="ctrl"><label class="clbl">Amount *</label><input class="fc" id="pmAmt" placeholder="0.00" style="max-width:160px;"></div>
+      <div class="ctrl"><label class="clbl">Currency</label><select class="fc" id="pmCur" style="max-width:160px;"><option>USD</option><option>EUR</option><option>GBP</option></select></div>
+      <div class="ctrl"><label class="clbl">Payment Method</label><input class="fc" id="pmMeth" placeholder="Wire / Crypto / etc."></div>
+    </div>
+    <div class="mft">
+      <button class="btn btn-df" onclick="closeM('pmM')">Close</button>
+      <button class="btn btn-pr" onclick="addPayment()">Submit Request</button>
+    </div>
+  </div>
+</div>
+<script src="/js/common.js"></script>
+<script>
+requireAuth(function() { loadPayments(); });
+async function loadPayments() {
+  var payments = await apiFetch('/api/payments');
+  var tb = document.getElementById('pTb');
+  if (!payments || payments.length === 0) {
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:18px;">No payment requests</td></tr>';
+    return;
+  }
+  tb.innerHTML = payments.map(function(p) {
+    var d = p.createdAt ? new Date(p.createdAt._seconds*1000).toISOString().substring(0,10) : '—';
+    var s = '<span class="lbl lbl-' + (p.status==='Pending'?'warning':(p.status==='Approved'?'success':'danger')) + '">' + p.status + '</span>';
+    return '<tr><td>' + d + '</td><td>' + (p.amount||'—') + '</td><td>' + (p.currency||'—') + '</td><td>' + (p.method||'—') + '</td><td>' + s + '</td></tr>';
+  }).join('');
+}
+async function addPayment() {
+  var amt = document.getElementById('pmAmt').value.trim();
+  if (!amt) { alert('Amount required.'); return; }
+  var data = { amount: amt, currency: document.getElementById('pmCur').value, method: document.getElementById('pmMeth').value };
+  var res = await apiFetch('/api/payments', { method: 'POST', body: JSON.stringify(data) });
+  if (res && res.id) { closeM('pmM'); loadPayments(); document.getElementById('pmAmt').value=''; document.getElementById('pmMeth').value=''; }
+  else { alert('Failed to submit request.'); }
+}
+</script>
+</body>
+</html>
