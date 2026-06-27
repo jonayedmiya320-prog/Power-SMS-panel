@@ -43,6 +43,26 @@ def create_app(config_name='default'):
 
     with app.app_context():
         db.create_all()
+
+        from app.models.user import User, Role
+
+        for role_name, display in [('admin','Administrator'),('agent','Agent'),('client','Client'),('developer','Developer')]:
+            if not Role.query.filter_by(name=role_name).first():
+                db.session.add(Role(name=role_name, display_name=display))
+        db.session.commit()
+
+        admin_role = Role.query.filter_by(name='admin').first()
+        if not User.query.filter_by(username='admin').first():
+            admin = User(
+                username='admin',
+                email='admin@panel.com',
+                password_hash=bcrypt.generate_password_hash('admin123').decode('utf-8'),
+                role=admin_role,
+                is_active=True
+            )
+            db.session.add(admin)
+            db.session.commit()
+
         from app.fetcher import start_all_providers
         start_all_providers(app)
 
