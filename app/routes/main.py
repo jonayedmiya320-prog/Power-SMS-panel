@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.sms import SMDRange, SMSNumber, SMSCDR
 from app.models.activity import News
-from app.models.user import User
+from app.models.user import User, Role
 from datetime import datetime, timedelta
 from sqlalchemy import func
 import math
@@ -180,17 +180,55 @@ def clients():
     )
     return render_template('main/clients.html', clients=clients_list)
 
+@main_bp.route('/agent/CreateClient', methods=['GET', 'POST'])
+@login_required
+def create_client():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        name = request.form.get('name')
+        company = request.form.get('company')
+        contact = request.form.get('contact')
+        country = request.form.get('country')
+
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists!', 'danger')
+            return redirect(url_for('main.create_client'))
+
+        if User.query.filter_by(email=email).first():
+            flash('Email already exists!', 'danger')
+            return redirect(url_for('main.create_client'))
+
+        client_role = Role.query.filter_by(name='client').first()
+        new_client = User(
+            username=username,
+            email=email,
+            name=name,
+            company=company,
+            contact=contact,
+            country=country,
+            role=client_role,
+            agent_id=current_user.id,
+            is_active=True
+        )
+        new_client.set_password(password)
+        db.session.add(new_client)
+        db.session.commit()
+        flash('Client created successfully!', 'success')
+        return redirect(url_for('main.clients'))
+
+    return render_template('main/create_client.html')
+
 @main_bp.route('/agent/Profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'POST':
         action = request.form.get('action')
-
         if action == 'change_password':
             current_password = request.form.get('current_password')
             new_password = request.form.get('new_password')
             confirm_password = request.form.get('confirm_password')
-
             if not current_user.check_password(current_password):
                 flash('Current password is wrong!', 'danger')
             elif new_password != confirm_password:
@@ -211,9 +249,7 @@ def profile():
             current_user.address = request.form.get('address')
             db.session.commit()
             flash('Profile updated successfully.', 'success')
-
         return redirect(url_for('main.profile'))
-
     return render_template('main/profile.html')
 
 @main_bp.route('/agent/MyActivity')
