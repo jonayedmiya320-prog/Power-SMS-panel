@@ -172,6 +172,9 @@ def sms_cdr_reports():
 @main_bp.route('/agent/Clients')
 @login_required
 def clients():
+    if current_user.is_client():
+        flash('Access denied!', 'danger')
+        return redirect(url_for('main.dashboard'))
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 25, type=int)
     clients_query = User.query.filter_by(agent_id=current_user.id)
@@ -183,6 +186,10 @@ def clients():
 @main_bp.route('/agent/CreateClient', methods=['GET', 'POST'])
 @login_required
 def create_client():
+    if current_user.is_client():
+        flash('Access denied!', 'danger')
+        return redirect(url_for('main.dashboard'))
+
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
