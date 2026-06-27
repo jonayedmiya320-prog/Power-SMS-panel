@@ -158,7 +158,6 @@
 
     <ul class="sb-nav">
 
-        <!-- Dashboard -->
         <li>
             <a href="{{ url_for('main.dashboard') }}"
                class="sb-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
@@ -166,7 +165,6 @@
             </a>
         </li>
 
-        <!-- SMS accordion -->
         <li>
             <span class="sb-link {% if request.endpoint in ('main.sms_ranges','main.my_sms_numbers','main.sms_cdr_reports') %}active open{% endif %}"
                   onclick="toggleAccordion(this,'sub-sms')">
@@ -198,7 +196,14 @@
             </ul>
         </li>
 
-        <!-- Clients — শুধু Admin আর Agent দেখবে -->
+        <!-- OTP Inbox — সবাই দেখবে -->
+        <li>
+            <a href="{{ url_for('provider.otp_inbox') }}"
+               class="sb-link {% if request.endpoint == 'provider.otp_inbox' %}active{% endif %}">
+                <i class="fa fa-inbox"></i> OTP Inbox
+            </a>
+        </li>
+
         {% if not current_user.is_client() %}
         <li>
             <a href="{{ url_for('main.clients') }}"
@@ -208,7 +213,6 @@
         </li>
         {% endif %}
 
-        <!-- Notifications — সবাই দেখবে -->
         <li>
             <a href="{{ url_for('main.notifications') }}"
                class="sb-link {% if request.endpoint == 'main.notifications' %}active{% endif %}">
@@ -216,7 +220,6 @@
             </a>
         </li>
 
-        <!-- Agent menu -->
         {% if current_user.is_agent() or current_user.is_admin() %}
         <div class="sb-divider"></div>
         <div class="sb-label">Agent</div>
@@ -256,7 +259,6 @@
         </li>
         {% endif %}
 
-        <!-- Developer menu -->
         {% if current_user.is_developer() %}
         <div class="sb-divider"></div>
         <div class="sb-label">Developer</div>
@@ -268,17 +270,16 @@
             </span>
             <ul class="sb-sub {% if request.endpoint and request.endpoint.startswith('dev.') %}expanded{% endif %}"
                 id="sub-dev">
-                <li><a href="{{ url_for('dev.index') }}" class="sb-link {% if request.endpoint == 'dev.index' %}active{% endif %}"><i class="fa fa-th"></i> All Assets</a></li>
+                <li><a href="{{ url_for('dev.index') }}" class="sb-link"><i class="fa fa-th"></i> All Assets</a></li>
                 <li><a href="{{ url_for('dev.upload') }}?type=img" class="sb-link"><i class="fa fa-image"></i> Images</a></li>
                 <li><a href="{{ url_for('dev.upload') }}?type=css" class="sb-link"><i class="fa fa-paint-brush"></i> CSS</a></li>
                 <li><a href="{{ url_for('dev.upload') }}?type=js" class="sb-link"><i class="fa fa-bolt"></i> JavaScript</a></li>
-                <li><a href="{{ url_for('dev.pages_list') }}" class="sb-link {% if request.endpoint in ('dev.pages_list','dev.page_view') %}active{% endif %}"><i class="fa fa-file-code-o"></i> HTML Pages</a></li>
+                <li><a href="{{ url_for('dev.pages_list') }}" class="sb-link"><i class="fa fa-file-code-o"></i> HTML Pages</a></li>
                 <li><a href="{{ url_for('dev.upload') }}?type=html" class="sb-link"><i class="fa fa-plus"></i> New Page</a></li>
             </ul>
         </li>
         {% endif %}
 
-        <!-- Account -->
         <div class="sb-divider"></div>
         <div class="sb-label">Account</div>
         <li>
@@ -294,7 +295,6 @@
             </a>
         </li>
 
-        <!-- Admin menu -->
         {% if current_user.is_admin() %}
         <div class="sb-divider"></div>
         <div class="sb-label" style="color:var(--danger);">Admin</div>
@@ -314,6 +314,8 @@
                 <li><a href="{{ url_for('admin.sms_cdr') }}" class="sb-link"><i class="fa fa-file-text"></i> CDR</a></li>
                 <li><a href="{{ url_for('admin.activity_logs') }}" class="sb-link"><i class="fa fa-history"></i> Logs</a></li>
                 <li><a href="{{ url_for('monitor.index') }}" class="sb-link"><i class="fa fa-rss"></i> SMS Monitor</a></li>
+                <li><a href="{{ url_for('provider.providers') }}" class="sb-link"><i class="fa fa-plug"></i> Providers</a></li>
+                <li><a href="{{ url_for('provider.otp_logs') }}" class="sb-link"><i class="fa fa-key"></i> OTP Logs</a></li>
             </ul>
         </li>
         {% endif %}
