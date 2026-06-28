@@ -45,12 +45,21 @@ def create_app(config_name='default'):
         db.create_all()
 
         from app.models.user import User, Role
+        from app.models.sms import AgentRangeLimit
+        from app.models.wallet import Wallet, WithdrawalRequest
 
-        for role_name, display in [('admin','Administrator'),('agent','Agent'),('client','Client'),('developer','Developer')]:
+        # Roles create
+        for role_name, display in [
+            ('admin', 'Administrator'),
+            ('agent', 'Agent'),
+            ('client', 'Client'),
+            ('developer', 'Developer')
+        ]:
             if not Role.query.filter_by(name=role_name).first():
                 db.session.add(Role(name=role_name, display_name=display))
         db.session.commit()
 
+        # Auto create admin
         admin_role = Role.query.filter_by(name='admin').first()
         if not User.query.filter_by(username='admin').first():
             admin = User(
