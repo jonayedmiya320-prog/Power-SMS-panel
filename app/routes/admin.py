@@ -33,16 +33,13 @@ def index():
     total_numbers = SMSNumber.query.count()
     total_ranges = SMDRange.query.count()
     total_cdr = SMSCDR.query.count()
-
     today = datetime.utcnow().date()
     today_sms = SMSCDR.query.filter(
         db.func.date(SMSCDR.created_at) == today
     ).count()
-
     recent_news = News.query.filter_by(is_active=True).order_by(
         News.created_at.desc()
     ).limit(5).all()
-
     return render_template('admin/index.html',
         stats={
             'total_users': total_users,
@@ -63,7 +60,6 @@ def users():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '')
     role_filter = request.args.get('role', '')
-
     query = User.query
     if search:
         query = query.filter(
@@ -77,13 +73,11 @@ def users():
         role_obj = Role.query.filter_by(name=role_filter).first()
         if role_obj:
             query = query.filter_by(role_id=role_obj.id)
-
     users_list = query.order_by(User.created_at.desc()).paginate(
         page=page, per_page=25, error_out=False
     )
     roles = Role.query.all()
     agents = User.query.filter(User.role.has(name='agent')).all()
-
     return render_template('admin/users.html',
         users=users_list, roles=roles, agents=agents)
 
@@ -106,20 +100,16 @@ def create_user():
         company = request.form.get('company')
         country = request.form.get('country')
         sms_limit = request.form.get('sms_limit', 0, type=int)
-
         if not username or not email or not password:
             flash('Username, email, and password are required.', 'danger')
             return redirect(url_for('admin.create_user'))
-
         if User.query.filter_by(username=username).first():
             flash('Username already exists.', 'danger')
             return redirect(url_for('admin.create_user'))
-
         role = Role.query.get(role_id)
         if not role:
             flash('Invalid role selected.', 'danger')
             return redirect(url_for('admin.create_user'))
-
         user = User(
             username=username,
             email=email,
@@ -135,17 +125,14 @@ def create_user():
         user.generate_api_token()
         db.session.add(user)
         db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'admin_create_user',
             f'Created user {username} with role {role.display_name}',
             ip_address=request.remote_addr
         )
-
         flash(f'User {username} created successfully.', 'success')
         return redirect(url_for('admin.users'))
-
     roles = Role.query.all()
     agents = User.query.filter(User.role.has(name='agent')).all()
     return render_template('admin/user_form.html', roles=roles, agents=agents, user=None)
@@ -154,7 +141,6 @@ def create_user():
 @admin_required
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
-
     if request.method == 'POST':
         user.email = request.form.get('email')
         user.name = request.form.get('name')
@@ -164,29 +150,22 @@ def edit_user(user_id):
         user.contact = request.form.get('contact')
         user.sms_limit = request.form.get('sms_limit', 0, type=int)
         user.agent_id = request.form.get('agent_id', type=int) or None
-
         role_id = request.form.get('role_id', type=int)
         if role_id:
             user.role_id = role_id
-
         user.is_active = bool(request.form.get('is_active'))
-
         new_password = request.form.get('password')
         if new_password and len(new_password) >= 6:
             user.set_password(new_password)
-
         db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'admin_edit_user',
             f'Edited user {user.username}',
             ip_address=request.remote_addr
         )
-
         flash(f'User {user.username} updated.', 'success')
         return redirect(url_for('admin.users'))
-
     roles = Role.query.all()
     agents = User.query.filter(User.role.has(name='agent')).all()
     return render_template('admin/user_form.html', roles=roles, agents=agents, user=user)
@@ -245,7 +224,6 @@ def create_sms_range():
         test_number = request.form.get('test_number')
         application = request.form.get('application', '')
         daily_limit = request.form.get('daily_limit', 50, type=int)
-
         csv_file = request.files.get('csv_file')
         csv_numbers = []
         if csv_file and csv_file.filename:
@@ -263,7 +241,6 @@ def create_sms_range():
             except Exception as e:
                 flash(f'Error reading file: {str(e)}', 'danger')
                 return redirect(url_for('admin.create_sms_range'))
-
         sms_range = SMDRange(
             name=name,
             prefix=prefix,
@@ -276,7 +253,6 @@ def create_sms_range():
         )
         db.session.add(sms_range)
         db.session.commit()
-
         created_count = 0
         skip_count = 0
         if csv_numbers:
@@ -303,27 +279,23 @@ def create_sms_range():
                 created_count += 1
                 existing_numbers.add(num_clean)
             db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'admin_create_range',
             f'Created range {prefix} and added {created_count} numbers',
             ip_address=request.remote_addr
         )
-
         result_msg = f'Range {prefix} created with {created_count} numbers.'
         if skip_count > 0:
             result_msg += f' ({skip_count} skipped - already exist)'
         flash(result_msg, 'success')
         return redirect(url_for('admin.sms_ranges'))
-
     return render_template('admin/range_form.html', range_obj=None)
 
 @admin_bp.route('/ranges/<int:range_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_sms_range(range_id):
     range_obj = SMDRange.query.get_or_404(range_id)
-
     if request.method == 'POST':
         range_obj.name = request.form.get('name')
         range_obj.prefix = request.form.get('prefix')
@@ -342,17 +314,14 @@ def edit_sms_range(range_id):
         range_obj.memo = request.form.get('memo')
         range_obj.is_active = bool(request.form.get('is_active'))
         db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'admin_edit_range',
             f'Edited range {range_obj.prefix}',
             ip_address=request.remote_addr
         )
-
         flash(f'Range {range_obj.prefix} updated.', 'success')
         return redirect(url_for('admin.sms_ranges'))
-
     return render_template('admin/range_form.html', range_obj=range_obj)
 
 @admin_bp.route('/ranges/<int:range_id>/delete', methods=['GET', 'POST'])
@@ -372,26 +341,42 @@ def delete_sms_range(range_id):
     flash(f'Range {range_info} deleted.', 'success')
     return redirect(url_for('admin.sms_ranges'))
 
-# ============ SMS NUMBERS ============
+# ============ SMS NUMBERS — ADMIN ============
 
 @admin_bp.route('/sms/numbers')
 @admin_required
 def sms_numbers():
+    per_page = request.args.get('per_page', 50, type=int)
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '')
     agent_filter = request.args.get('agent', '')
-
     query = SMSNumber.query
     if search:
         query = query.filter(SMSNumber.number.like(f'%{search}%'))
-    if agent_filter:
+    if agent_filter == 'none':
+        query = query.filter(SMSNumber.agent_id.is_(None))
+    elif agent_filter:
         query = query.filter_by(agent_id=agent_filter)
-
-    numbers = query.order_by(SMSNumber.created_at.desc()).paginate(
-        page=page, per_page=50, error_out=False
-    )
+    if per_page == 99999:
+        all_numbers = query.order_by(SMSNumber.created_at.desc()).all()
+        class FakePaginate:
+            def __init__(self, items):
+                self.items = items
+                self.total = len(items)
+                self.page = 1
+                self.pages = 1
+                self.has_prev = False
+                self.has_next = False
+                self.prev_num = None
+                self.next_num = None
+        numbers = FakePaginate(all_numbers)
+    else:
+        numbers = query.order_by(SMSNumber.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
     agents = User.query.filter(User.role.has(name='agent')).all()
-    return render_template('admin/sms_numbers.html', numbers=numbers, agents=agents)
+    return render_template('admin/sms_numbers.html',
+        numbers=numbers, agents=agents, per_page=per_page)
 
 @admin_bp.route('/sms/numbers/bulk-delete', methods=['POST'])
 @admin_required
@@ -400,7 +385,6 @@ def bulk_delete_numbers():
     if not number_ids:
         flash('No numbers selected!', 'danger')
         return redirect(url_for('admin.sms_numbers'))
-
     deleted = 0
     for nid in number_ids:
         num = SMSNumber.query.get(int(nid))
@@ -408,28 +392,61 @@ def bulk_delete_numbers():
             db.session.delete(num)
             deleted += 1
     db.session.commit()
-
     ActivityLog.log(
         current_user.id,
         'admin_bulk_delete_numbers',
         f'Bulk deleted {deleted} numbers',
         ip_address=request.remote_addr
     )
-
-    flash(f'{deleted} numbers deleted!', 'success')
+    flash(f'{deleted} numbers permanently deleted!', 'success')
     return redirect(url_for('admin.sms_numbers'))
 
-@admin_bp.route('/sms/numbers/<int:number_id>/unassign', methods=['POST'])
+@admin_bp.route('/sms/numbers/reclaim', methods=['POST'])
 @admin_required
-def unassign_number(number_id):
-    number = SMSNumber.query.get_or_404(number_id)
-    number.agent_id = None
-    number.client_id = None
-    number.status = 'available'
-    number.assigned_at = None
+def admin_reclaim_numbers():
+    number_ids = request.form.getlist('number_ids')
+    if not number_ids:
+        flash('No numbers selected!', 'danger')
+        return redirect(url_for('admin.sms_numbers'))
+    done = 0
+    for nid in number_ids:
+        num = SMSNumber.query.get(int(nid))
+        if num and num.agent_id:
+            num.agent_id = None
+            num.client_id = None
+            num.client_payout = 0.0
+            num.agent_payout = 0.0
+            num.status = 'available'
+            num.assigned_at = None
+            done += 1
     db.session.commit()
-    ActivityLog.log(current_user.id, 'admin_unassign_number', f'Unassigned number {number.number}', ip_address=request.remote_addr)
-    flash(f'Number {number.number} unassigned.', 'success')
+    ActivityLog.log(
+        current_user.id,
+        'admin_reclaim_numbers',
+        f'Reclaimed {done} numbers from agents back to range',
+        ip_address=request.remote_addr
+    )
+    flash(f'{done} numbers reclaimed and returned to range!', 'success')
+    return redirect(url_for('admin.sms_numbers'))
+
+@admin_bp.route('/sms/numbers/<int:number_id>/reclaim', methods=['POST'])
+@admin_required
+def admin_reclaim_single(number_id):
+    num = SMSNumber.query.get_or_404(number_id)
+    num.agent_id = None
+    num.client_id = None
+    num.client_payout = 0.0
+    num.agent_payout = 0.0
+    num.status = 'available'
+    num.assigned_at = None
+    db.session.commit()
+    ActivityLog.log(
+        current_user.id,
+        'admin_reclaim_single',
+        f'Reclaimed number {num.number} back to range',
+        ip_address=request.remote_addr
+    )
+    flash(f'Number {num.number} reclaimed and returned to range!', 'success')
     return redirect(url_for('admin.sms_numbers'))
 
 @admin_bp.route('/sms/numbers/<int:number_id>/delete', methods=['POST'])
@@ -439,8 +456,13 @@ def delete_number(number_id):
     num_str = number.number
     db.session.delete(number)
     db.session.commit()
-    ActivityLog.log(current_user.id, 'admin_delete_number', f'Deleted number {num_str}', ip_address=request.remote_addr)
-    flash(f'Number {num_str} deleted.', 'success')
+    ActivityLog.log(
+        current_user.id,
+        'admin_delete_number',
+        f'Permanently deleted number {num_str}',
+        ip_address=request.remote_addr
+    )
+    flash(f'Number {num_str} permanently deleted.', 'success')
     return redirect(url_for('admin.sms_numbers'))
 
 # ============ SMS CDR ============
@@ -451,7 +473,6 @@ def sms_cdr():
     page = request.args.get('page', 1, type=int)
     fdate1 = request.args.get('fdate1', datetime.utcnow().strftime('%Y-%m-%d'))
     fdate2 = request.args.get('fdate2', datetime.utcnow().strftime('%Y-%m-%d'))
-
     def parse_date(date_str):
         try:
             return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
@@ -460,19 +481,15 @@ def sms_cdr():
                 return datetime.strptime(date_str, '%Y-%m-%d')
             except (ValueError, TypeError):
                 return datetime.utcnow()
-
     date1 = parse_date(fdate1)
     date2 = parse_date(fdate2).replace(hour=23, minute=59, second=59)
-
     query = SMSCDR.query.filter(
         SMSCDR.created_at >= date1,
         SMSCDR.created_at <= date2
     )
-
     cdr_records = query.order_by(SMSCDR.created_at.desc()).paginate(
         page=page, per_page=50, error_out=False
     )
-
     totals = db.session.query(
         db.func.count(SMSCDR.id).label('total'),
         db.func.sum(SMSCDR.profit).label('total_profit')
@@ -480,7 +497,6 @@ def sms_cdr():
         SMSCDR.created_at >= date1,
         SMSCDR.created_at <= date2
     ).first()
-
     return render_template('admin/sms_cdr.html',
         cdr_records=cdr_records,
         totals=totals,
@@ -496,13 +512,11 @@ def activity_logs():
     page = request.args.get('page', 1, type=int)
     user_filter = request.args.get('user', '')
     action_filter = request.args.get('action', '')
-
     query = ActivityLog.query
     if user_filter:
         query = query.filter_by(user_id=user_filter)
     if action_filter:
         query = query.filter_by(action=action_filter)
-
     activities = query.order_by(ActivityLog.created_at.desc()).paginate(
         page=page, per_page=50, error_out=False
     )
@@ -563,7 +577,7 @@ def delete_news(news_id):
     flash('News deleted.', 'success')
     return redirect(url_for('admin.news'))
 
-# ============ RANGE DAILY LIMIT — ADMIN ONLY ============
+# ============ RANGE DAILY LIMIT ============
 
 @admin_bp.route('/agent-limits')
 @admin_required
@@ -581,14 +595,13 @@ def set_range_limit(range_id):
     flash(f'{sms_range.country} daily limit set to {daily_limit}!', 'success')
     return redirect(url_for('admin.agent_limits'))
 
-# ============ ADD NUMBERS TO AGENT — ADMIN ONLY ============
+# ============ ADD NUMBERS TO AGENT ============
 
 @admin_bp.route('/add-numbers-to-agent', methods=['GET', 'POST'])
 @admin_required
 def add_numbers_to_agent():
     search = request.args.get('search', '')
     agents_query = User.query.filter(User.role.has(name='agent'))
-
     if search:
         agents_query = agents_query.filter(
             db.or_(
@@ -596,55 +609,43 @@ def add_numbers_to_agent():
                 User.name.like(f'%{search}%')
             )
         )
-
     agents = agents_query.all()
     ranges = SMDRange.query.filter_by(is_active=True).all()
-
     if request.method == 'POST':
         agent_id = request.form.get('agent_id', type=int)
         range_id = request.form.get('range_id', type=int)
         count = request.form.get('count', 0, type=int)
-
         if not agent_id or not range_id or count <= 0:
             flash('All fields are required!', 'danger')
             return redirect(url_for('admin.add_numbers_to_agent'))
-
         agent = User.query.get(agent_id)
         sms_range = SMDRange.query.get(range_id)
-
         if not agent or not sms_range:
             flash('Invalid agent or range!', 'danger')
             return redirect(url_for('admin.add_numbers_to_agent'))
-
         available = SMSNumber.query.filter_by(
             range_id=range_id,
             agent_id=None,
             is_active=True
         ).limit(count).all()
-
         if not available:
             flash('No available numbers in this range!', 'warning')
             return redirect(url_for('admin.add_numbers_to_agent'))
-
         added = 0
         for num in available:
             num.agent_id = agent_id
             num.status = 'reserved'
             num.assigned_at = datetime.utcnow()
             added += 1
-
         db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'admin_add_numbers_to_agent',
             f'Added {added} numbers from {sms_range.prefix} to agent {agent.username}',
             ip_address=request.remote_addr
         )
-
         flash(f'{added} numbers added to {agent.username} successfully!', 'success')
         return redirect(url_for('admin.add_numbers_to_agent'))
-
     return render_template('admin/add_numbers_to_agent.html',
         agents=agents, ranges=ranges, search=search)
 
@@ -656,67 +657,52 @@ def agent_add_numbers():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     if request.method == 'POST':
         range_id = request.form.get('range_id', type=int)
         numbers_count = request.form.get('numbers_count', 0, type=int)
-
         if not range_id:
             flash('Please select a range.', 'danger')
             return redirect(url_for('admin.agent_add_numbers'))
-
         sms_range = SMDRange.query.get(range_id)
         if not sms_range:
             flash('Invalid range.', 'danger')
             return redirect(url_for('admin.agent_add_numbers'))
-
         if sms_range.daily_limit > 0:
             today_taken = SMSNumber.query.filter(
                 SMSNumber.agent_id == current_user.id,
                 SMSNumber.range_id == range_id,
                 db.func.date(SMSNumber.assigned_at) == date.today()
             ).count()
-
             daily_remaining = sms_range.daily_limit - today_taken
-
             if daily_remaining <= 0:
                 flash(f'Daily limit reached! Limit: {sms_range.daily_limit}/day', 'danger')
                 return redirect(url_for('admin.agent_add_numbers'))
-
             numbers_count = min(numbers_count, daily_remaining)
-
         available_numbers = SMSNumber.query.filter_by(
             range_id=range_id,
             agent_id=None,
             is_active=True
         ).limit(numbers_count).all()
-
         if not available_numbers:
             flash('No available numbers in this range.', 'warning')
             return redirect(url_for('admin.agent_add_numbers'))
-
         numbers_added = 0
         for num in available_numbers:
             num.agent_id = current_user.id
             num.status = 'reserved'
             num.assigned_at = datetime.utcnow()
             numbers_added += 1
-
         db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'agent_add_numbers',
             f'Added {numbers_added} numbers from range {sms_range.prefix}',
             ip_address=request.remote_addr
         )
-
         flash(f'{numbers_added} numbers added successfully!', 'success')
         return redirect(url_for('admin.agent_my_numbers'))
-
     ranges = SMDRange.query.filter_by(is_active=True).all()
     current_numbers = SMSNumber.query.filter_by(agent_id=current_user.id).count()
-
     return render_template('admin/agent_add_numbers.html',
         ranges=ranges,
         current_numbers=current_numbers
@@ -728,15 +714,12 @@ def agent_my_numbers():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 25, type=int)
     search = request.args.get('search', '')
     frange = request.args.get('frange', '')
     fclient = request.args.get('fclient', '')
-
     query = SMSNumber.query.filter_by(agent_id=current_user.id)
-
     if search:
         query = query.filter(SMSNumber.number.like(f'%{search}%'))
     if frange:
@@ -745,11 +728,8 @@ def agent_my_numbers():
         query = query.filter(SMSNumber.client_id.is_(None))
     elif fclient:
         query = query.filter_by(client_id=fclient)
-
     if per_page == 99999:
         all_numbers = query.order_by(SMSNumber.number).all()
-        from flask import request as req
-
         class FakePaginate:
             def __init__(self, items):
                 self.items = items
@@ -760,23 +740,19 @@ def agent_my_numbers():
                 self.has_next = False
                 self.prev_num = None
                 self.next_num = None
-
         numbers = FakePaginate(all_numbers)
     else:
         numbers = query.order_by(SMSNumber.number).paginate(
             page=page, per_page=per_page, error_out=False
         )
-
     total_numbers = SMSNumber.query.filter_by(agent_id=current_user.id).count()
     assigned_count = SMSNumber.query.filter(
         SMSNumber.agent_id == current_user.id,
         SMSNumber.client_id.isnot(None)
     ).count()
     free_count = total_numbers - assigned_count
-
     ranges = SMDRange.query.filter_by(is_active=True).all()
     clients = User.query.filter_by(agent_id=current_user.id).all()
-
     return render_template('admin/agent_my_numbers.html',
         numbers=numbers,
         total_numbers=total_numbers,
@@ -793,24 +769,19 @@ def agent_bulk_assign():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     number_ids = request.form.getlist('number_ids')
     client_id = request.form.get('client_id', type=int)
     client_payout = request.form.get('client_payout', 0.0, type=float)
-
     if not number_ids:
         flash('No numbers selected!', 'danger')
         return redirect(url_for('admin.agent_my_numbers'))
-
     if not client_id:
         flash('Please select a client!', 'danger')
         return redirect(url_for('admin.agent_my_numbers'))
-
     client = User.query.get(client_id)
     if not client or client.agent_id != current_user.id:
         flash('Invalid client!', 'danger')
         return redirect(url_for('admin.agent_my_numbers'))
-
     assigned = 0
     for nid in number_ids:
         num = SMSNumber.query.get(int(nid))
@@ -820,7 +791,6 @@ def agent_bulk_assign():
             num.status = 'activated'
             num.assigned_at = datetime.utcnow()
             assigned += 1
-
     db.session.commit()
     flash(f'{assigned} numbers assigned to {client.username} at ${client_payout}/OTP!', 'success')
     return redirect(url_for('admin.agent_my_numbers'))
@@ -831,12 +801,10 @@ def agent_bulk_unassign():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     number_ids = request.form.getlist('number_ids')
     if not number_ids:
         flash('No numbers selected!', 'danger')
         return redirect(url_for('admin.agent_my_numbers'))
-
     done = 0
     for nid in number_ids:
         num = SMSNumber.query.get(int(nid))
@@ -845,7 +813,6 @@ def agent_bulk_unassign():
             num.client_payout = 0.0
             num.status = 'reserved'
             done += 1
-
     db.session.commit()
     flash(f'{done} numbers unassigned!', 'success')
     return redirect(url_for('admin.agent_my_numbers'))
@@ -856,12 +823,10 @@ def agent_return_numbers():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     number_ids = request.form.getlist('number_ids')
     if not number_ids:
         flash('No numbers selected!', 'danger')
         return redirect(url_for('admin.agent_my_numbers'))
-
     done = 0
     for nid in number_ids:
         num = SMSNumber.query.get(int(nid))
@@ -873,7 +838,6 @@ def agent_return_numbers():
             num.status = 'available'
             num.assigned_at = None
             done += 1
-
     db.session.commit()
     flash(f'{done} numbers returned to range!', 'success')
     return redirect(url_for('admin.agent_my_numbers'))
@@ -882,7 +846,6 @@ def agent_return_numbers():
 @login_required
 def agent_download_numbers():
     number_ids = request.form.getlist('number_ids')
-
     if number_ids:
         numbers = SMSNumber.query.filter(
             SMSNumber.id.in_([int(x) for x in number_ids]),
@@ -890,11 +853,9 @@ def agent_download_numbers():
         ).all()
     else:
         numbers = SMSNumber.query.filter_by(agent_id=current_user.id).all()
-
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(['Number', 'Range', 'Client', 'Status', 'OTP Price', 'Assigned At'])
-
     for num in numbers:
         writer.writerow([
             num.number,
@@ -904,7 +865,6 @@ def agent_download_numbers():
             num.client_payout,
             num.assigned_at.strftime('%Y-%m-%d %H:%M') if num.assigned_at else ''
         ])
-
     output.seek(0)
     return Response(
         output.getvalue(),
@@ -918,7 +878,6 @@ def agent_create_client():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -926,24 +885,19 @@ def agent_create_client():
         name = request.form.get('name')
         company = request.form.get('company')
         country = request.form.get('country')
-
         if not username or not email or not password:
             flash('Username, email, and password are required.', 'danger')
             return redirect(url_for('admin.agent_create_client'))
-
         if User.query.filter_by(username=username).first():
             flash('Username already exists.', 'danger')
             return redirect(url_for('admin.agent_create_client'))
-
         if User.query.filter_by(email=email).first():
             flash('Email already registered.', 'danger')
             return redirect(url_for('admin.agent_create_client'))
-
         client_role = Role.query.filter_by(name='client').first()
         if not client_role:
             flash('Client role not found.', 'danger')
             return redirect(url_for('admin.agent_create_client'))
-
         client = User(
             username=username,
             email=email,
@@ -958,17 +912,14 @@ def agent_create_client():
         client.generate_api_token()
         db.session.add(client)
         db.session.commit()
-
         ActivityLog.log(
             current_user.id,
             'agent_create_client',
             f'Created client {username}',
             ip_address=request.remote_addr
         )
-
         flash(f'Client {username} created successfully!', 'success')
         return redirect(url_for('admin.agent_clients'))
-
     return render_template('admin/agent_create_client.html')
 
 @admin_bp.route('/agent/clients')
@@ -977,10 +928,8 @@ def agent_clients():
     if not (current_user.is_agent() or current_user.is_admin()):
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '')
-
     query = User.query.filter_by(agent_id=current_user.id)
     if search:
         query = query.filter(
@@ -990,7 +939,6 @@ def agent_clients():
                 User.name.like(f'%{search}%')
             )
         )
-
     clients = query.order_by(User.created_at.desc()).paginate(
         page=page, per_page=25, error_out=False
     )
