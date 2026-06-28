@@ -21,7 +21,7 @@ class SMDRange(db.Model):
     payout = db.Column(db.Float, default=0.0)
     cost_per_sms = db.Column(db.Float, default=0.005)
 
-    application = db.Column(db.String(50))   # e.g. 'facebook', 'whatsapp'
+    application = db.Column(db.String(50))
     test_number = db.Column(db.String(50))
     memo = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True)
@@ -39,8 +39,11 @@ class SMDRange(db.Model):
         ).count()
 
     def get_available_count(self):
-        reserved = self.get_reserved_count()
-        return max(0, (self.max_numbers or 100000) - reserved)
+        return SMSNumber.query.filter_by(
+            range_id=self.id,
+            agent_id=None,
+            is_active=True
+        ).count()
 
     def to_dict(self):
         return {
@@ -103,9 +106,6 @@ class SMSNumber(db.Model):
     def __repr__(self):
         return f'<SMSNumber {self.number}>'
 
-    def is_reserved(self):
-        return self.agent_id is not None
-
     def to_dict(self):
         return {
             'id': self.id,
@@ -113,18 +113,47 @@ class SMSNumber(db.Model):
             'prefix': self.prefix,
             'range_id': self.range_id,
             'range': self.sms_range.country if self.sms_range else None,
-            'range_name': self.sms_range.name if self.sms_range else None,
             'agent_id': self.agent_id,
             'client_id': self.client_id,
             'client_name': self.client.username if self.client else None,
             'agent_payout': self.agent_payout,
             'client_payout': self.client_payout,
-            'daily_limit': self.daily_limit,
-            'weekly_limit': self.weekly_limit,
+            'status': self.status,
             'is_active': self.is_active,
-            'is_reserved': self.is_reserved(),
             'assigned_at': self.assigned_at.isoformat() if self.assigned_at else None
         }
+
+
+class AgentRangeLimit(db.Model):
+    __tablename__ = 'agent_range_limits'
+
+    id = db.Column(db.Integer, primary_key=True)
+    agent_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    range_id = db.Column(db.Integer, db.ForeignKey('sms_ranges.id'), nullable=False)
+    daily_limit = db.Column(db.Integer, default=50)
+    total_limit = db.Column(db.Integer, default=1000)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    agent = db.relationship('User', foreign_keys=[agent_id], backref='range_limits')
+    range = db.relationship('SMDRange', foreign_keys=[range_id], backref='agent_limits')
+
+    __table_args__ = (db.UniqueConstraint('agent_id', 'range_id', name='uq_agent_range'),)
+
+    def get_today_taken(self):
+        from datetime import date
+        today = date.today()
+        return SMSNumber.query.filter(
+            SMSNumber.agent_id == self.agent_id,
+            SMSNumber.range_id == self.range_id,
+            db.func.date(SMSNumber.assigned_at) == today
+        ).count()
+
+    def get_total_taken(self):
+        return SMSNumber.query.filter_by(
+            agent_id=self.agent_id,
+            range_id=self.range_id
+        ).count()
 
 
 class SMSCDR(db.Model):
@@ -149,10 +178,9 @@ class SMSCDR(db.Model):
     agent_payout = db.Column(db.Float, default=0.0)
     client_payout = db.Column(db.Float, default=0.0)
     profit = db.Column(db.Float, default=0.0)
-    sms_type = db.Column(db.String(20), default='sent')  # 'sent' or 'received'
+    sms_type = db.Column(db.String(20), default='received')
     status = db.Column(db.String(20), default='completed')
 
-    # Relationships — backref names must not conflict with SMDRange.numbers
     sms_number = db.relationship('SMSNumber', foreign_keys=[number_id], backref='cdrs')
     range_info = db.relationship('SMDRange', foreign_keys=[range_id], backref='cdrs')
 
@@ -162,21 +190,13 @@ class SMSCDR(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'number_id': self.number_id,
             'number': self.sms_number.number if self.sms_number else None,
-            'range_id': self.range_id,
-            # FIX: use range_info (correct backref name), not sms_range
             'range': self.range_info.prefix if self.range_info else None,
             'caller_id': self.caller_id,
             'cli': self.cli,
             'message': self.message,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'duration': self.duration,
-            'currency': self.currency,
-            'rate': self.rate,
             'agent_payout': self.agent_payout,
             'client_payout': self.client_payout,
-            'profit': self.profit,
-            'sms_type': self.sms_type,
             'status': self.status
         }
