@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, date
 
 
 class SMDRange(db.Model):
@@ -15,6 +15,7 @@ class SMDRange(db.Model):
     mnc = db.Column(db.String(10))
     hlr_lookup = db.Column(db.Boolean, default=False)
     max_numbers = db.Column(db.Integer, default=100000)
+    daily_limit = db.Column(db.Integer, default=50)
 
     currency = db.Column(db.String(3), default='USD')
     rate = db.Column(db.Float, default=0.0)
@@ -33,16 +34,24 @@ class SMDRange(db.Model):
     def __repr__(self):
         return f'<SMDRange {self.prefix} - {self.country}>'
 
-    def get_reserved_count(self):
-        return SMSNumber.query.filter_by(range_id=self.id).filter(
-            SMSNumber.agent_id.isnot(None)
-        ).count()
-
     def get_available_count(self):
         return SMSNumber.query.filter_by(
             range_id=self.id,
             agent_id=None,
             is_active=True
+        ).count()
+
+    def get_reserved_count(self):
+        return SMSNumber.query.filter(
+            SMSNumber.range_id == self.id,
+            SMSNumber.agent_id.isnot(None)
+        ).count()
+
+    def get_today_taken_by_agent(self, agent_id):
+        return SMSNumber.query.filter(
+            SMSNumber.range_id == self.id,
+            SMSNumber.agent_id == agent_id,
+            db.func.date(SMSNumber.assigned_at) == date.today()
         ).count()
 
     def to_dict(self):
@@ -55,10 +64,9 @@ class SMDRange(db.Model):
             'network_type': self.network_type,
             'mcc': self.mcc,
             'mnc': self.mnc,
-            'hlr_lookup': self.hlr_lookup,
-            'max_numbers': self.max_numbers,
-            'reserved_count': self.get_reserved_count(),
+            'daily_limit': self.daily_limit,
             'available_count': self.get_available_count(),
+            'reserved_count': self.get_reserved_count(),
             'currency': self.currency,
             'rate': self.rate,
             'payout': self.payout,
@@ -141,12 +149,10 @@ class AgentRangeLimit(db.Model):
     __table_args__ = (db.UniqueConstraint('agent_id', 'range_id', name='uq_agent_range'),)
 
     def get_today_taken(self):
-        from datetime import date
-        today = date.today()
         return SMSNumber.query.filter(
             SMSNumber.agent_id == self.agent_id,
             SMSNumber.range_id == self.range_id,
-            db.func.date(SMSNumber.assigned_at) == today
+            db.func.date(SMSNumber.assigned_at) == date.today()
         ).count()
 
     def get_total_taken(self):
