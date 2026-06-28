@@ -1,14 +1,16 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, Response
 from flask_login import login_required, current_user
 from app import db
-from app.models.sms import SMDRange, SMSNumber, SMSCDR
+from app.models.sms import SMDRange, SMSNumber, SMSCDR, AgentRangeLimit
 from app.models.activity import News
 from app.models.user import User, Role
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from sqlalchemy import func
-import math
+import csv
+import io
 
 main_bp = Blueprint('main', __name__)
+
 
 @main_bp.route('/agent/')
 @main_bp.route('/agent/dashboard')
@@ -16,7 +18,6 @@ main_bp = Blueprint('main', __name__)
 def dashboard():
     today = datetime.utcnow().date()
     week_ago = today - timedelta(days=7)
-    month_ago = today - timedelta(days=30)
 
     today_sms = SMSCDR.query.filter(
         SMSCDR.user_id == current_user.id,
@@ -26,11 +27,6 @@ def dashboard():
     week_sms = SMSCDR.query.filter(
         SMSCDR.user_id == current_user.id,
         SMSCDR.created_at >= week_ago
-    ).count()
-
-    month_sms = SMSCDR.query.filter(
-        SMSCDR.user_id == current_user.id,
-        SMSCDR.created_at >= month_ago
     ).count()
 
     first_of_month = today.replace(day=1)
@@ -57,7 +53,6 @@ def dashboard():
     return render_template('main/dashboard.html',
         today_sms=today_sms,
         week_sms=week_sms,
-        month_sms=month_sms,
         month_total=month_total,
         ranges_count=ranges_count,
         numbers_count=numbers_count,
@@ -67,13 +62,15 @@ def dashboard():
         chart_data=chart_data
     )
 
+
 @main_bp.route('/agent/SMSRanges')
 @login_required
 def sms_ranges():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 25, type=int)
-    ranges_query = SMDRange.query.filter_by(is_active=True)
     search = request.args.get('search', '')
+
+    ranges_query = SMDRange.query.filter_by(is_active=True)
     if search:
         ranges_query = ranges_query.filter(
             db.or_(
@@ -84,27 +81,256 @@ def sms_ranges():
     ranges = ranges_query.order_by(SMDRange.country).paginate(
         page=page, per_page=per_page, error_out=False
     )
-    return render_template('main/sms_ranges.html', ranges=ranges)
+
+    # Agent limits for each range
+    limits = {}
+    if current_user.is_agent():
+        for lim in AgentRangeLimit.query.filter_by(agent_id=current_user.id).all():
+            limits[lim.range_id] = lim
+
+    return render_template('main/sms_ranges.html', ranges=ranges, limits=limits)
+
+
+@main_bp.route('/agent/TakeNumbers/<int:range_id>', methods=['POST'])
+@login_required
+def take_numbers(range_id):
+    if not (current_user.is_agent() or current_user.is_admin()):
+        flash('Access denied!', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    sms_range = SMDRange.query.get_or_404(range_id)
+    count = request.form.get('count', 0, type=int)
+
+    if count <= 0:
+        flash('Please enter a valid number count!', 'danger')
+        return redirect(url_for('main.sms_ranges'))
+
+    # Check agent daily limit for this range
+    limit = AgentRangeLimit.query.filter_by(
+        agent_id=current_user.id,
+        range_id=range_id
+    ).first()
+
+    if limit:
+        today_taken = SMSNumber.query.filter(
+            SMSNumber.agent_id == current_user.id,
+            SMSNumber.range_id == range_id,
+            func.date(SMSNumber.assigned_at) == date.today()
+        ).count()
+
+        total_taken = SMSNumber.query.filter_by(
+            agent_id=current_user.id,
+            range_id=range_id
+        ).count()
+
+        daily_remaining = limit.daily_limit - today_taken
+        total_remaining = limit.total_limit - total_taken
+
+        if daily_remaining <= 0:
+            flash(f'Daily limit reached for {sms_range.country}! Limit: {limit.daily_limit}/day', 'danger')
+            return redirect(url_for('main.sms_ranges'))
+
+        if total_remaining <= 0:
+            flash(f'Total limit reached for {sms_range.country}!', 'danger')
+            return redirect(url_for('main.sms_ranges'))
+
+        count = min(count, daily_remaining, total_remaining)
+
+    # Get available numbers — duplicate protected
+    available = SMSNumber.query.filter_by(
+        range_id=range_id,
+        agent_id=None,
+        is_active=True
+    ).limit(count).all()
+
+    if not available:
+        flash(f'No available numbers in {sms_range.country}!', 'warning')
+        return redirect(url_for('main.sms_ranges'))
+
+    taken = 0
+    for num in available:
+        num.agent_id = current_user.id
+        num.status = 'reserved'
+        num.assigned_at = datetime.utcnow()
+        taken += 1
+
+    db.session.commit()
+
+    flash(f'{taken} numbers taken from {sms_range.country} successfully!', 'success')
+    return redirect(url_for('main.my_sms_numbers'))
+
 
 @main_bp.route('/agent/MySMSNumbers')
 @login_required
 def my_sms_numbers():
-    page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 25, type=int)
-    numbers_query = SMSNumber.query.filter_by(agent_id=current_user.id)
+    page = request.args.get('page', 1, type=int)
     range_filter = request.args.get('frange', '')
+    client_filter = request.args.get('fclient', '')
+    search = request.args.get('search', '')
+
+    numbers_query = SMSNumber.query.filter_by(agent_id=current_user.id)
+
     if range_filter:
         numbers_query = numbers_query.filter_by(range_id=range_filter)
-    client_filter = request.args.get('fclient', '')
     if client_filter:
         numbers_query = numbers_query.filter_by(client_id=client_filter)
+    if search:
+        numbers_query = numbers_query.filter(SMSNumber.number.like(f'%{search}%'))
+
     numbers = numbers_query.order_by(SMSNumber.number).paginate(
         page=page, per_page=per_page, error_out=False
     )
+
     ranges = SMDRange.query.filter_by(is_active=True).all()
     clients = User.query.filter_by(agent_id=current_user.id).all()
+
+    total_numbers = SMSNumber.query.filter_by(agent_id=current_user.id).count()
+    assigned_count = SMSNumber.query.filter(
+        SMSNumber.agent_id == current_user.id,
+        SMSNumber.client_id.isnot(None)
+    ).count()
+    free_count = total_numbers - assigned_count
+
     return render_template('main/my_sms_numbers.html',
-        numbers=numbers, ranges=ranges, clients=clients)
+        numbers=numbers,
+        ranges=ranges,
+        clients=clients,
+        total_numbers=total_numbers,
+        assigned_count=assigned_count,
+        free_count=free_count,
+        per_page=per_page
+    )
+
+
+@main_bp.route('/agent/BulkAssign', methods=['POST'])
+@login_required
+def bulk_assign():
+    if not (current_user.is_agent() or current_user.is_admin()):
+        flash('Access denied!', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    number_ids = request.form.getlist('number_ids')
+    client_id = request.form.get('client_id', type=int)
+    client_payout = request.form.get('client_payout', 0.0, type=float)
+
+    if not number_ids:
+        flash('No numbers selected!', 'danger')
+        return redirect(url_for('main.my_sms_numbers'))
+
+    if not client_id:
+        flash('Please select a client!', 'danger')
+        return redirect(url_for('main.my_sms_numbers'))
+
+    client = User.query.get(client_id)
+    if not client or client.agent_id != current_user.id:
+        flash('Invalid client!', 'danger')
+        return redirect(url_for('main.my_sms_numbers'))
+
+    assigned = 0
+    for nid in number_ids:
+        num = SMSNumber.query.get(int(nid))
+        if num and num.agent_id == current_user.id:
+            num.client_id = client_id
+            num.client_payout = client_payout
+            num.status = 'activated'
+            num.assigned_at = datetime.utcnow()
+            assigned += 1
+
+    db.session.commit()
+    flash(f'{assigned} numbers assigned to {client.username} at ${client_payout}/OTP!', 'success')
+    return redirect(url_for('main.my_sms_numbers'))
+
+
+@main_bp.route('/agent/BulkUnassign', methods=['POST'])
+@login_required
+def bulk_unassign():
+    if not (current_user.is_agent() or current_user.is_admin()):
+        flash('Access denied!', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    number_ids = request.form.getlist('number_ids')
+    if not number_ids:
+        flash('No numbers selected!', 'danger')
+        return redirect(url_for('main.my_sms_numbers'))
+
+    done = 0
+    for nid in number_ids:
+        num = SMSNumber.query.get(int(nid))
+        if num and num.agent_id == current_user.id:
+            num.client_id = None
+            num.client_payout = 0.0
+            num.status = 'reserved'
+            done += 1
+
+    db.session.commit()
+    flash(f'{done} numbers unassigned from clients!', 'success')
+    return redirect(url_for('main.my_sms_numbers'))
+
+
+@main_bp.route('/agent/ReturnNumbers', methods=['POST'])
+@login_required
+def return_numbers():
+    if not (current_user.is_agent() or current_user.is_admin()):
+        flash('Access denied!', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    number_ids = request.form.getlist('number_ids')
+    if not number_ids:
+        flash('No numbers selected!', 'danger')
+        return redirect(url_for('main.my_sms_numbers'))
+
+    done = 0
+    for nid in number_ids:
+        num = SMSNumber.query.get(int(nid))
+        if num and num.agent_id == current_user.id:
+            num.agent_id = None
+            num.client_id = None
+            num.client_payout = 0.0
+            num.agent_payout = 0.0
+            num.status = 'available'
+            num.assigned_at = None
+            done += 1
+
+    db.session.commit()
+    flash(f'{done} numbers returned to range successfully!', 'success')
+    return redirect(url_for('main.my_sms_numbers'))
+
+
+@main_bp.route('/agent/DownloadNumbers', methods=['POST'])
+@login_required
+def download_numbers():
+    number_ids = request.form.getlist('number_ids')
+
+    if number_ids:
+        numbers = SMSNumber.query.filter(
+            SMSNumber.id.in_([int(x) for x in number_ids]),
+            SMSNumber.agent_id == current_user.id
+        ).all()
+    else:
+        numbers = SMSNumber.query.filter_by(agent_id=current_user.id).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Number', 'Range', 'Client', 'Status', 'Client Payout', 'Assigned At'])
+
+    for num in numbers:
+        writer.writerow([
+            num.number,
+            f"{num.sms_range.prefix} - {num.sms_range.country}" if num.sms_range else '',
+            num.client.username if num.client else 'Unassigned',
+            num.status,
+            num.client_payout,
+            num.assigned_at.strftime('%Y-%m-%d %H:%M') if num.assigned_at else ''
+        ])
+
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=numbers.csv'}
+    )
+
 
 @main_bp.route('/agent/SMSCDRReports')
 @login_required
@@ -124,8 +350,7 @@ def sms_cdr_reports():
                 return datetime.utcnow()
 
     date1 = parse_date(fdate1)
-    date2 = parse_date(fdate2)
-    date2 = date2.replace(hour=23, minute=59, second=59)
+    date2 = parse_date(fdate2).replace(hour=23, minute=59, second=59)
 
     cdr_query = SMSCDR.query.filter(
         SMSCDR.user_id == current_user.id,
@@ -142,9 +367,6 @@ def sms_cdr_reports():
     fnum = request.args.get('fnum', '')
     if fnum:
         cdr_query = cdr_query.join(SMSNumber).filter(SMSNumber.number.like(f'%{fnum}%'))
-    fcli = request.args.get('fcli', '')
-    if fcli:
-        cdr_query = cdr_query.filter(SMSCDR.cli.like(f'%{fcli}%'))
 
     cdr_records = cdr_query.order_by(SMSCDR.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
@@ -153,7 +375,6 @@ def sms_cdr_reports():
     totals = db.session.query(
         func.sum(SMSCDR.agent_payout).label('total_payout'),
         func.sum(SMSCDR.client_payout).label('total_client'),
-        func.sum(SMSCDR.profit).label('total_profit'),
         func.count(SMSCDR.id).label('total_sms')
     ).filter(
         SMSCDR.user_id == current_user.id,
@@ -165,9 +386,14 @@ def sms_cdr_reports():
     clients = User.query.filter_by(agent_id=current_user.id).all()
 
     return render_template('main/sms_cdr_reports.html',
-        cdr_records=cdr_records, totals=totals,
-        ranges=ranges, clients=clients,
-        fdate1=fdate1, fdate2=fdate2)
+        cdr_records=cdr_records,
+        totals=totals,
+        ranges=ranges,
+        clients=clients,
+        fdate1=fdate1,
+        fdate2=fdate2
+    )
+
 
 @main_bp.route('/agent/Clients')
 @login_required
@@ -176,12 +402,11 @@ def clients():
         flash('Access denied!', 'danger')
         return redirect(url_for('main.dashboard'))
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 25, type=int)
-    clients_query = User.query.filter_by(agent_id=current_user.id)
-    clients_list = clients_query.order_by(User.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
+    clients_list = User.query.filter_by(agent_id=current_user.id).order_by(
+        User.created_at.desc()
+    ).paginate(page=page, per_page=25, error_out=False)
     return render_template('main/clients.html', clients=clients_list)
+
 
 @main_bp.route('/agent/CreateClient', methods=['GET', 'POST'])
 @login_required
@@ -227,6 +452,7 @@ def create_client():
 
     return render_template('main/create_client.html')
 
+
 @main_bp.route('/agent/Profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -259,6 +485,7 @@ def profile():
         return redirect(url_for('main.profile'))
     return render_template('main/profile.html')
 
+
 @main_bp.route('/agent/MyActivity')
 @login_required
 def my_activity():
@@ -268,6 +495,7 @@ def my_activity():
         ActivityLog.created_at.desc()
     ).paginate(page=page, per_page=50, error_out=False)
     return render_template('main/my_activity.html', activities=activities)
+
 
 @main_bp.route('/agent/Notifications')
 @login_required
