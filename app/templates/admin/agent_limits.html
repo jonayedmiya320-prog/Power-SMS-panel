@@ -1,141 +1,46 @@
 {% extends "base.html" %}
-{% block title %}Agent Range Limits{% endblock %}
+{% block title %}Range Daily Limits{% endblock %}
 
 {% block content %}
 <div style="margin-bottom:16px;">
-    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-sliders"></i> Agent Range Limits</h4>
-    <p style="color:var(--muted); font-size:13px; margin-top:6px;">এখান থেকে প্রতিটা Agent কোন Range থেকে দিনে কতটা নাম্বার নিতে পারবে সেটা set করো।</p>
+    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-sliders"></i> Range Daily Limits</h4>
+    <p style="color:var(--muted); font-size:13px; margin-top:6px;">প্রতিটা Range থেকে সব Agent দিনে কতটা নাম্বার নিতে পারবে সেটা এখান থেকে set করো।</p>
 </div>
 
-<!-- Set Limit Form -->
-<div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px;">
-    <h6 style="color:var(--muted); margin-bottom:16px; font-size:11px; letter-spacing:1px; text-transform:uppercase;">নতুন Limit Set করো</h6>
-    <form method="POST" action="{{ url_for('admin.set_agent_limit') }}" style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
-
-        <div>
-            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">AGENT SEARCH</label>
-            <input type="text" placeholder="Search agent..." id="agentSearch" onkeyup="filterAgents()"
-                style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px; width:160px;">
-        </div>
-
-        <div>
-            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">AGENT</label>
-            <select name="agent_id" id="agentSelect" required style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px; min-width:160px;">
-                <option value="">-- Select Agent --</option>
-                {% for a in agents %}
-                <option value="{{ a.id }}">{{ a.username }}{% if a.name %} ({{ a.name }}){% endif %}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div>
-            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">RANGE</label>
-            <select name="range_id" required style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px; min-width:180px;">
-                <option value="">-- Select Range --</option>
-                {% for r in ranges %}
-                <option value="{{ r.id }}">{{ r.prefix }} - {{ r.country }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div>
-            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">DAILY LIMIT</label>
-            <input type="number" name="daily_limit" value="50" min="1"
-                style="width:90px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px;">
-        </div>
-
-        <div>
-            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">TOTAL LIMIT</label>
-            <input type="number" name="total_limit" value="1000" min="1"
-                style="width:100px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px;">
-        </div>
-
-        <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:700; cursor:pointer;">
-            <i class="fa fa-save"></i> Save Limit
-        </button>
-    </form>
-</div>
-
-<!-- Current Limits Table -->
 <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; overflow:hidden;">
-    <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
-        <strong style="font-size:13px;">Current Limits</strong>
-        <form method="GET" style="display:flex; gap:6px;">
-            <input type="text" name="search" value="{{ search }}" placeholder="Search agent..."
-                style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:5px 10px; font-size:12px; width:160px;">
-            <button type="submit" style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer;">
-                <i class="fa fa-search"></i>
-            </button>
-        </form>
-    </div>
     <div style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
             <thead>
                 <tr style="border-bottom:1px solid var(--border);">
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Agent</th>
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Range</th>
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Daily Limit</th>
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Total Limit</th>
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Today Taken</th>
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Total Taken</th>
-                    <th style="padding:10px 16px; text-align:left; color:var(--muted); font-weight:600;">Action</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Country</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Prefix</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Available</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Daily Limit (all agents)</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% set found = [] %}
-                {% for a in agents %}
-                    {% for lim in a.range_limits %}
-                    {% if not search or search.lower() in a.username.lower() %}
-                    {% set _ = found.append(1) %}
-                    <tr style="border-bottom:1px solid var(--border); transition:background .15s;" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
-                        <td style="padding:10px 16px;">
-                            <strong style="color:var(--accent);">{{ lim.agent.username }}</strong>
-                            {% if lim.agent.name %}<br><span style="color:var(--muted); font-size:11px;">{{ lim.agent.name }}</span>{% endif %}
-                        </td>
-                        <td style="padding:10px 16px; font-family:monospace; color:var(--txt);">
-                            +{{ lim.range.prefix }} — {{ lim.range.country }}
-                        </td>
-                        <td style="padding:10px 16px;">
-                            <span style="color:var(--warn); font-weight:700;">{{ lim.daily_limit }}</span>
-                            <span style="color:var(--muted); font-size:11px;">/day</span>
-                        </td>
-                        <td style="padding:10px 16px; color:var(--txt);">{{ lim.total_limit }}</td>
-                        <td style="padding:10px 16px; color:var(--success);">{{ lim.get_today_taken() }}</td>
-                        <td style="padding:10px 16px; color:var(--txt);">{{ lim.get_total_taken() }}</td>
-                        <td style="padding:10px 16px;">
-                            <form method="POST" action="{{ url_for('admin.delete_agent_limit', limit_id=lim.id) }}" onsubmit="return confirm('Remove this limit?')">
-                                <button type="submit" style="background:var(--danger); color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer;">
-                                    <i class="fa fa-trash"></i> Remove
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endif %}
-                    {% endfor %}
-                {% endfor %}
-                {% if not found %}
-                <tr>
-                    <td colspan="7" style="padding:30px; text-align:center; color:var(--muted);">
-                        No limits set yet.
+                {% for r in ranges %}
+                <tr style="border-bottom:1px solid var(--border); transition:background .15s;" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
+                    <td style="padding:12px 16px;"><strong>{{ r.country }}</strong></td>
+                    <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">+{{ r.prefix }}</td>
+                    <td style="padding:12px 16px; color:var(--success); font-weight:700;">{{ r.get_available_count() }}</td>
+                    <td style="padding:12px 16px;">
+                        <form method="POST" action="{{ url_for('admin.set_range_limit', range_id=r.id) }}" style="display:flex; gap:8px; align-items:center;">
+                            <input type="number" name="daily_limit" value="{{ r.daily_limit }}" min="1"
+                                style="width:90px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:6px 10px; font-size:13px;">
+                            <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer;">
+                                <i class="fa fa-save"></i> Save
+                            </button>
+                        </form>
+                    </td>
+                    <td style="padding:12px 16px; color:var(--muted); font-size:12px;">
+                        Per agent per day
                     </td>
                 </tr>
-                {% endif %}
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-{% block extra_js %}
-<script>
-function filterAgents() {
-    var search = document.getElementById('agentSearch').value.toLowerCase();
-    var select = document.getElementById('agentSelect');
-    for (var i = 0; i < select.options.length; i++) {
-        var opt = select.options[i];
-        if (opt.value === '') continue;
-        opt.style.display = opt.text.toLowerCase().includes(search) ? '' : 'none';
-    }
-}
-</script>
-{% endblock %}
 {% endblock %}
