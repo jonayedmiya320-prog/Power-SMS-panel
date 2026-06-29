@@ -224,6 +224,7 @@ def create_sms_range():
         test_number = request.form.get('test_number')
         application = request.form.get('application', '')
         daily_limit = request.form.get('daily_limit', 50, type=int)
+        payout = request.form.get('payout', 0.0, type=float)
         csv_file = request.files.get('csv_file')
         csv_numbers = []
         if csv_file and csv_file.filename:
@@ -248,6 +249,7 @@ def create_sms_range():
             test_number=test_number,
             application=application if application else None,
             daily_limit=daily_limit,
+            payout=payout,
             cost_per_sms=0.005,
             is_active=True
         )
@@ -306,10 +308,10 @@ def edit_sms_range(range_id):
         range_obj.mcc = request.form.get('mcc')
         range_obj.mnc = request.form.get('mnc')
         range_obj.daily_limit = request.form.get('daily_limit', 50, type=int)
+        range_obj.payout = request.form.get('payout', 0.0, type=float)
         range_obj.cost_per_sms = request.form.get('cost_per_sms', 0.005, type=float)
         range_obj.currency = request.form.get('currency', 'USD')
         range_obj.rate = request.form.get('rate', 0.0, type=float)
-        range_obj.payout = request.form.get('payout', 0.0, type=float)
         range_obj.test_number = request.form.get('test_number')
         range_obj.memo = request.form.get('memo')
         range_obj.is_active = bool(request.form.get('is_active'))
@@ -341,7 +343,7 @@ def delete_sms_range(range_id):
     flash(f'Range {range_info} deleted.', 'success')
     return redirect(url_for('admin.sms_ranges'))
 
-# ============ SMS NUMBERS — ADMIN ============
+# ============ SMS NUMBERS ============
 
 @admin_bp.route('/sms/numbers')
 @admin_required
@@ -423,7 +425,7 @@ def admin_reclaim_numbers():
     ActivityLog.log(
         current_user.id,
         'admin_reclaim_numbers',
-        f'Reclaimed {done} numbers from agents back to range',
+        f'Reclaimed {done} numbers back to range',
         ip_address=request.remote_addr
     )
     flash(f'{done} numbers reclaimed and returned to range!', 'success')
@@ -543,13 +545,13 @@ def create_news():
         if not headline:
             flash('Headline is required.', 'danger')
             return redirect(url_for('admin.create_news'))
-        news = News(
+        news_item = News(
             headline=headline,
             content=content,
             created_by=current_user.id,
             is_active=True
         )
-        db.session.add(news)
+        db.session.add(news_item)
         db.session.commit()
         flash('News created.', 'success')
         return redirect(url_for('admin.news'))
@@ -558,21 +560,21 @@ def create_news():
 @admin_bp.route('/news/<int:news_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_news(news_id):
-    news = News.query.get_or_404(news_id)
+    news_item = News.query.get_or_404(news_id)
     if request.method == 'POST':
-        news.headline = request.form.get('headline')
-        news.content = request.form.get('content')
-        news.is_active = bool(request.form.get('is_active'))
+        news_item.headline = request.form.get('headline')
+        news_item.content = request.form.get('content')
+        news_item.is_active = bool(request.form.get('is_active'))
         db.session.commit()
         flash('News updated.', 'success')
         return redirect(url_for('admin.news'))
-    return render_template('admin/news_form.html', news=news)
+    return render_template('admin/news_form.html', news=news_item)
 
 @admin_bp.route('/news/<int:news_id>/delete', methods=['POST'])
 @admin_required
 def delete_news(news_id):
-    news = News.query.get_or_404(news_id)
-    db.session.delete(news)
+    news_item = News.query.get_or_404(news_id)
+    db.session.delete(news_item)
     db.session.commit()
     flash('News deleted.', 'success')
     return redirect(url_for('admin.news'))
@@ -594,6 +596,16 @@ def set_range_limit(range_id):
     db.session.commit()
     flash(f'{sms_range.country} daily limit set to {daily_limit}!', 'success')
     return redirect(url_for('admin.agent_limits'))
+
+@admin_bp.route('/ranges/set-payout/<int:range_id>', methods=['POST'])
+@admin_required
+def set_range_payout(range_id):
+    sms_range = SMDRange.query.get_or_404(range_id)
+    payout = request.form.get('payout', 0.0, type=float)
+    sms_range.payout = payout
+    db.session.commit()
+    flash(f'{sms_range.country} payout set to ${payout:.4f}/OTP!', 'success')
+    return redirect(url_for('admin.sms_ranges'))
 
 # ============ ADD NUMBERS TO AGENT ============
 
