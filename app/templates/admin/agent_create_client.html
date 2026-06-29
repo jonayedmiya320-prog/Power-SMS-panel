@@ -1,93 +1,63 @@
 {% extends "base.html" %}
+{% block title %}Create New Client{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Create New Client</h3>
-                </div>
-                <div class="card-body">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}">{{ message }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+<div style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
+    <a href="{{ url_for('admin.agent_clients') }}" style="color:var(--muted); text-decoration:none; font-size:13px;">
+        <i class="fa fa-arrow-left"></i> Back to Clients
+    </a>
+    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-user-plus"></i> Create New Client</h4>
+</div>
 
-                    <form method="POST">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="username">Username *</label>
-                                    <input type="text" name="username" id="username"
-                                           class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email">Email *</label>
-                                    <input type="email" name="email" id="email"
-                                           class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
+<div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:24px; max-width:560px;">
+    <form method="POST" action="{{ url_for('admin.agent_create_client') }}">
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="password">Password *</label>
-                                    <input type="password" name="password" id="password"
-                                           class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name">Full Name</label>
-                                    <input type="text" name="name" id="name"
-                                           class="form-control">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="company">Company</label>
-                                    <input type="text" name="company" id="company"
-                                           class="form-control">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="country">Country</label>
-                                    <input type="text" name="country" id="country"
-                                           class="form-control">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="numbers_count">Assign Numbers to Client (Optional)</label>
-                            <input type="number" name="numbers_count" id="numbers_count"
-                                   class="form-control" value="0" min="0">
-                            <small class="form-text text-muted">
-                                Enter the number of SMS numbers to assign to this client from your available numbers.
-                            </small>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-user-plus"></i> Create Client
-                        </button>
-                        <a href="{{ url_for('admin.agent_clients') }}" class="btn btn-secondary">
-                            <i class="fas fa-list"></i> View My Clients
-                        </a>
-                    </form>
-                </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+            <div>
+                <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Username *</label>
+                <input type="text" name="username" required
+                    style="width:100%; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:9px 12px; font-size:13px;">
+            </div>
+            <div>
+                <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Email *</label>
+                <input type="email" name="email" required
+                    style="width:100%; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:9px 12px; font-size:13px;">
             </div>
         </div>
-    </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Password *</label>
+            <input type="password" name="password" required
+                style="width:100%; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:9px 12px; font-size:13px;">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+            <div>
+                <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Full Name</label>
+                <input type="text" name="name"
+                    style="width:100%; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:9px 12px; font-size:13px;">
+            </div>
+            <div>
+                <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Company</label>
+                <input type="text" name="company"
+                    style="width:100%; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:9px 12px; font-size:13px;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Country</label>
+            <input type="text" name="country"
+                style="width:100%; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:9px 12px; font-size:13px;">
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:10px 24px; font-size:13px; font-weight:700; cursor:pointer;">
+                <i class="fa fa-user-plus"></i> Create Client
+            </button>
+            <a href="{{ url_for('admin.agent_clients') }}" style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:10px 18px; font-size:13px; text-decoration:none;">
+                Cancel
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}
