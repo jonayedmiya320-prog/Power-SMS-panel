@@ -1,29 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-</head>
 {% extends "base.html" %}
-
-{% block title %}Notifications - RAZOR SMS PANEL{% endblock %}
-
+{% block title %}Notifications - RAZOR SMS{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="breadcrumb">
-            <h4><i class="fa fa-bell"></i> Notifications</h4>
-        </div>
-    </div>
+
+<div style="margin-bottom:16px;">
+    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-bell"></i> Notifications</h4>
 </div>
 
-<div class="widget-block">
-    <div class="widget-head">
-        <h5><i class="fa fa-bullhorn"></i> System Notifications</h5>
-    </div>
-    <div class="widget-content">
-        <div class="alert alert-info">
-            <i class="fa fa-info-circle"></i> No new notifications at this time.
-        </div>
+<div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:24px;">
+    <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+        <i class="fa fa-info-circle" style="font-size:20px;"></i>
+        <span style="font-size:14px;">No new notifications at this time.</span>
     </div>
 </div>
 {% endblock %}
