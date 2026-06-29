@@ -1,122 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
 {% extends "base.html" %}
-{% block title %}User Details - RAZOR SMS{% endblock %}
+
+{% block title %}User Details - ABYSS SMS{% endblock %}
+
 {% block content %}
-
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-user"></i> User Details</h4>
-    <a href="{{ url_for('admin.users') }}" style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:8px 16px; font-size:13px; text-decoration:none;">
-        <i class="fa fa-arrow-left"></i> Back
-    </a>
-</div>
-
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-
-    <!-- Account Info -->
-    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px;">
-        <h6 style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">
-            <i class="fa fa-user"></i> Account Information
-        </h6>
-        <table style="width:100%; border-collapse:collapse; font-size:13px;">
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted); width:40%;">User ID</td>
-                <td style="padding:10px 0; color:var(--txt);">{{ user.id }}</td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted);">Username</td>
-                <td style="padding:10px 0;"><strong style="color:var(--accent);">{{ user.username }}</strong></td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted);">Email</td>
-                <td style="padding:10px 0; color:var(--txt);">{{ user.email }}</td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted);">Role</td>
-                <td style="padding:10px 0;">
-                    <span style="background:rgba(0,212,255,.1); color:var(--accent); padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;">{{ user.role.display_name if user.role else 'N/A' }}</span>
-                </td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted);">Status</td>
-                <td style="padding:10px 0;">
-                    {% if user.is_active %}
-                    <span style="background:rgba(46,213,115,.15); color:var(--success); padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700;">Active</span>
-                    {% else %}
-                    <span style="background:rgba(255,71,87,.15); color:var(--danger); padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700;">Inactive</span>
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td style="padding:10px 0; color:var(--muted);">Agent</td>
-                <td style="padding:10px 0; color:var(--txt);">{{ user.agent.username if user.agent else '-' }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <!-- API Info -->
-    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px;">
-        <h6 style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">
-            <i class="fa fa-key"></i> API Access
-        </h6>
-        <table style="width:100%; border-collapse:collapse; font-size:13px;">
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted); width:40%;">API Token</td>
-                <td style="padding:10px 0;"><code style="color:var(--accent); background:rgba(0,212,255,.1); padding:2px 6px; border-radius:4px; font-size:11px;">{{ user.api_token or 'N/A' }}</code></td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted);">Login Attempts</td>
-                <td style="padding:10px 0; color:var(--txt);">{{ user.login_attempts }}</td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px 0; color:var(--muted);">Last Login</td>
-                <td style="padding:10px 0; color:var(--txt);">{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
-            </tr>
-            <tr>
-                <td style="padding:10px 0; color:var(--muted);">Created</td>
-                <td style="padding:10px 0; color:var(--txt);">{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</td>
-            </tr>
-        </table>
-    </div>
-</div>
-
-<!-- Profile Info -->
-<div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:16px;">
-    <h6 style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">
-        <i class="fa fa-info-circle"></i> Profile Information
-    </h6>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;">
-        <div>
-            <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Full Name</div>
-            <div style="color:var(--txt);">{{ user.name or '-' }}</div>
-        </div>
-        <div>
-            <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Company</div>
-            <div style="color:var(--txt);">{{ user.company or '-' }}</div>
-        </div>
-        <div>
-            <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Country</div>
-            <div style="color:var(--txt);">{{ user.country or '-' }}</div>
-        </div>
-        <div>
-            <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Contact</div>
-            <div style="color:var(--txt);">{{ user.contact or '-' }}</div>
-        </div>
-        <div>
-            <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Skype</div>
-            <div style="color:var(--txt);">{{ user.skype or '-' }}</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="breadcrumb">
+            <h4><i class="fa fa-user"></i> User Details</h4>
         </div>
     </div>
 </div>
 
-<!-- Action Buttons -->
-<div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" style="background:var(--warn); color:#000; border:none; border-radius:6px; padding:10px 20px; font-size:13px; font-weight:700; text-decoration:none;">
-        <i class="fa fa-edit"></i> Edit User
-    </a>
-    <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Toggle status for {{ user.username }}?')">
-        <button type="submit" style="background:{% if user.is_active %}var(--danger){% else %}var(--success){% endif %}; color:{% if user.is_active %}#fff{% else %}#000{% endif %}; border:none; border-radius:6px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer;">
-            <i class="fa fa-{% if user.is_active %}lock{% else %}unlock{% endif %}"></i>
-            {{ 'Deactivate' if user.is_active else 'Activate' }}
-        </button>
-    </form>
+<div class="row">
+    <div class="col-md-6">
+        <div class="widget-block">
+            <div class="widget-head">
+                <h5><i class="fa fa-user"></i> Account Information</h5>
+            </div>
+            <div class="widget-content">
+                <table class="table">
+                    <tr>
+                        <th>User ID:</th>
+                        <td>{{ user.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Username:</th>
+                        <td><strong>{{ user.username }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Role:</th>
+                        <td><span class="label label-default">{{ user.role.display_name if user.role else 'N/A' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="label label-success">Active</span>
+                            {% else %}
+                            <span class="label label-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Agent:</th>
+                        <td>
+                            {% if user.agent %}
+                            {{ user.agent.username }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="widget-block">
+            <div class="widget-head">
+                <h5><i class="fa fa-key"></i> API Access</h5>
+            </div>
+            <div class="widget-content">
+                <table class="table">
+                    <tr>
+                        <th>API Token:</th>
+                        <td><code>{{ user.api_token }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Login Attempts:</th>
+                        <td>{{ user.login_attempts }}</td>
+                    </tr>
+                    <tr>
+                        <th>Last Login:</th>
+                        <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Created:</th>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="widget-block">
+            <div class="widget-head">
+                <h5><i class="fa fa-info-circle"></i> Profile Information</h5>
+            </div>
+            <div class="widget-content">
+                <table class="table">
+                    <tr>
+                        <th>Full Name:</th>
+                        <td>{{ user.name or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Company:</th>
+                        <td>{{ user.company or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Country:</th>
+                        <td>{{ user.country or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Contact:</th>
+                        <td>{{ user.contact or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Skype:</th>
+                        <td>{{ user.skype or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address:</th>
+                        <td>{{ user.address or 'N/A' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-warning"><i class="fa fa-edit"></i> Edit</a>
+        <a href="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" class="btn btn-{% if user.is_active %}danger{% else %}success{% endif %}">
+            <i class="fa fa-{% if user.is_active %}lock{% else %}unlock{% endif %}"></i> {{ 'Deactivate' if user.is_active else 'Activate' }}
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
+    </div>
 </div>
 {% endblock %}
