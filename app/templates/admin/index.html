@@ -1,140 +1,84 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-</head>
 {% extends "base.html" %}
-
-{% block title %}Admin Panel - ABYSS SMS{% endblock %}
+{% block title %}Admin Overview{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="breadcrumb">
-            <h4><i class="fa fa-shield"></i> Admin Panel</h4>
+<div style="margin-bottom:16px;">
+    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-dashboard"></i> Admin Overview</h4>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:24px;">
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Total Users</div>
+        <div style="font-size:28px; font-weight:800; color:var(--accent);">{{ stats.total_users }}</div>
+    </div>
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Active Users</div>
+        <div style="font-size:28px; font-weight:800; color:var(--success);">{{ stats.active_users }}</div>
+    </div>
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Total Numbers</div>
+        <div style="font-size:28px; font-weight:800; color:var(--warn);">{{ stats.total_numbers }}</div>
+    </div>
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Total Ranges</div>
+        <div style="font-size:28px; font-weight:800; color:var(--txt);">{{ stats.total_ranges }}</div>
+    </div>
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Today SMS</div>
+        <div style="font-size:28px; font-weight:800; color:var(--accent);">{{ stats.today_sms }}</div>
+    </div>
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Total CDR</div>
+        <div style="font-size:28px; font-weight:800; color:var(--txt);">{{ stats.total_cdr }}</div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <h6 style="margin:0; font-size:13px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;"><i class="fa fa-bullhorn"></i> Latest News</h6>
+            <a href="{{ url_for('admin.create_news') }}" style="background:var(--accent); color:#000; border-radius:6px; padding:4px 12px; font-size:12px; font-weight:700; text-decoration:none;">+ Add</a>
         </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-3">
-        <a href="{{ url_for('admin.users') }}" class="widget-block" style="display: block; text-decoration: none; color: inherit;">
-            <div class="widget-content text-center" style="padding: 30px;">
-                <i class="fa fa-users" style="font-size: 48px; color: #e94560;"></i>
-                <h4 style="margin-top: 15px;">Manage Users</h4>
-                <p class="text-muted">View and edit user accounts</p>
+        {% if recent_news %}
+        {% for news in recent_news %}
+        <div style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+            <div>
+                <div style="font-weight:600; font-size:13px; color:var(--txt);">{{ news.headline }}</div>
+                <div style="font-size:11px; color:var(--muted); margin-top:4px;">{{ news.created_at.strftime('%Y-%m-%d') if news.created_at else '' }}</div>
             </div>
-        </a>
-    </div>
-    <div class="col-md-3">
-        <a href="{{ url_for('admin.sms_ranges') }}" class="widget-block" style="display: block; text-decoration: none; color: inherit;">
-            <div class="widget-content text-center" style="padding: 30px;">
-                <i class="fa fa-flag" style="font-size: 48px; color: #28a745;"></i>
-                <h4 style="margin-top: 15px;">SMS Ranges</h4>
-                <p class="text-muted">Manage SMS ranges</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-3">
-        <a href="{{ url_for('admin.sms_numbers') }}" class="widget-block" style="display: block; text-decoration: none; color: inherit;">
-            <div class="widget-content text-center" style="padding: 30px;">
-                <i class="fa fa-phone" style="font-size: 48px; color: #007bff;"></i>
-                <h4 style="margin-top: 15px;">SMS Numbers</h4>
-                <p class="text-muted">Manage SMS numbers</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-3">
-        <a href="{{ url_for('admin.sms_send') }}" class="widget-block" style="display: block; text-decoration: none; color: inherit;">
-            <div class="widget-content text-center" style="padding: 30px;">
-                <i class="fa fa-paper-plane" style="font-size: 48px; color: #6f42c1;"></i>
-                <h4 style="margin-top: 15px;">Send SMS</h4>
-                <p class="text-muted">Send SMS to numbers</p>
-            </div>
-        </a>
-    </div>
-</div>
-
-<div class="row" style="margin-top: 20px;">
-    <div class="col-md-3">
-        <a href="{{ url_for('admin.activity_logs') }}" class="widget-block" style="display: block; text-decoration: none; color: inherit;">
-            <div class="widget-content text-center" style="padding: 30px;">
-                <i class="fa fa-history" style="font-size: 48px; color: #fd7e14;"></i>
-                <h4 style="margin-top: 15px;">Activity Logs</h4>
-                <p class="text-muted">View all activity logs</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-3">
-        <a href="{{ url_for('admin.sms_cdr') }}" class="widget-block" style="display: block; text-decoration: none; color: inherit;">
-            <div class="widget-content text-center" style="padding: 30px;">
-                <i class="fa fa-file-text" style="font-size: 48px; color: #17a2b8;"></i>
-                <h4 style="margin-top: 15px;">SMS CDR</h4>
-                <p class="text-muted">View SMS call records</p>
-            </div>
-        </a>
-    </div>
-</div>
-
-<div class="row" style="margin-top: 20px;">
-    <div class="col-md-6">
-        <div class="widget-block">
-            <div class="widget-head">
-                <h5><i class="fa fa-bar-chart"></i> System Statistics</h5>
-            </div>
-            <div class="widget-content">
-                <table class="table">
-                    <tr>
-                        <th>Total Users:</th>
-                        <td><strong>{{ stats.total_users }}</strong></td>
-                    </tr>
-                    <tr>
-                        <th>Active Users:</th>
-                        <td><span class="label label-success">{{ stats.active_users }}</span></td>
-                    </tr>
-                    <tr>
-                        <th>Total SMS Ranges:</th>
-                        <td><strong>{{ stats.total_ranges }}</strong></td>
-                    </tr>
-                    <tr>
-                        <th>Total SMS Numbers:</th>
-                        <td><strong>{{ stats.total_numbers }}</strong></td>
-                    </tr>
-                    <tr>
-                        <th>Total CDR Records:</th>
-                        <td><strong>{{ stats.total_cdr }}</strong></td>
-                    </tr>
-                    <tr>
-                        <th>SMS Today:</th>
-                        <td><strong>{{ stats.today_sms }}</strong></td>
-                    </tr>
-                </table>
-            </div>
+            <form method="POST" action="{{ url_for('admin.delete_news', news_id=news.id) }}" onsubmit="return confirm('Delete?')">
+                <button type="submit" style="background:var(--danger); color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </form>
         </div>
+        {% endfor %}
+        {% else %}
+        <p style="color:var(--muted); font-size:13px;">No news available.</p>
+        {% endif %}
     </div>
 
-    <div class="col-md-6">
-        <div class="widget-block">
-            <div class="widget-head">
-                <h5><i class="fa fa-bullhorn"></i> News Management</h5>
-                <a href="{{ url_for('admin.create_news') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add News</a>
-            </div>
-            <div class="widget-content">
-                <ul class="list-unstyled">
-                    {% if recent_news %}
-                    {% for news in recent_news %}
-                    <li style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <strong>{{ news.headline }}</strong>
-                        <br>
-                        <small class="text-muted">{{ news.created_at.strftime('%Y-%m-%d') if news.created_at else '' }}</small>
-                        <a href="{{ url_for('admin.delete_news', news_id=news.id) }}" class="btn btn-xs btn-danger pull-right" onclick="return confirm('Are you sure?')"><i class="fa fa-trash"></i></a>
-                    </li>
-                    {% endfor %}
-                    {% else %}
-                    <li class="text-muted">No news available.</li>
-                    {% endif %}
-                </ul>
-            </div>
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px;">
+        <h6 style="margin:0 0 16px; font-size:13px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;"><i class="fa fa-link"></i> Quick Links</h6>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <a href="{{ url_for('admin.users') }}" style="display:flex; align-items:center; gap:10px; background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:12px 16px; text-decoration:none; color:var(--txt);">
+                <i class="fa fa-users" style="color:var(--accent);"></i> Manage Users
+            </a>
+            <a href="{{ url_for('admin.sms_ranges') }}" style="display:flex; align-items:center; gap:10px; background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:12px 16px; text-decoration:none; color:var(--txt);">
+                <i class="fa fa-flag" style="color:var(--success);"></i> SMS Ranges
+            </a>
+            <a href="{{ url_for('admin.sms_numbers') }}" style="display:flex; align-items:center; gap:10px; background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:12px 16px; text-decoration:none; color:var(--txt);">
+                <i class="fa fa-phone" style="color:var(--warn);"></i> All Numbers
+            </a>
+            <a href="{{ url_for('admin.agent_limits') }}" style="display:flex; align-items:center; gap:10px; background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:12px 16px; text-decoration:none; color:var(--txt);">
+                <i class="fa fa-sliders" style="color:var(--accent);"></i> Range Limits
+            </a>
+            <a href="{{ url_for('admin.add_numbers_to_agent') }}" style="display:flex; align-items:center; gap:10px; background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:12px 16px; text-decoration:none; color:var(--txt);">
+                <i class="fa fa-plus-circle" style="color:var(--success);"></i> Add Numbers to Agent
+            </a>
+            <a href="{{ url_for('admin.activity_logs') }}" style="display:flex; align-items:center; gap:10px; background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:12px 16px; text-decoration:none; color:var(--txt);">
+                <i class="fa fa-history" style="color:var(--muted);"></i> Activity Logs
+            </a>
         </div>
     </div>
 </div>
