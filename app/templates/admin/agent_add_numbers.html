@@ -3,15 +3,15 @@
 
 {% block content %}
 <div style="margin-bottom:16px;">
-    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-plus-circle"></i> Add Numbers to My Account</h4>
-    <p style="color:var(--muted); font-size:13px; margin-top:6px;">Range থেকে নাম্বার নিন। Daily limit অনুযায়ী নেওয়া যাবে।</p>
+    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-plus-circle"></i> Add Numbers</h4>
+    <p style="color:var(--muted); font-size:13px; margin-top:6px;">Select a range and take numbers. Daily limit applies per range.</p>
 </div>
 
 <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px;">
     <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
         <div style="background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:14px 20px; text-align:center;">
             <div style="font-size:24px; font-weight:800; color:var(--accent);">{{ current_numbers }}</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:4px;">Total Numbers</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">Total Numbers in My Account</div>
         </div>
     </div>
 
@@ -21,21 +21,30 @@
                 <tr style="border-bottom:1px solid var(--border);">
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Country</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Prefix</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Payout / OTP</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Daily Limit</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Today Taken</th>
-                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Remaining Today</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Remaining</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Take Numbers</th>
                 </tr>
             </thead>
             <tbody>
                 {% for r in ranges %}
                 {% set today_taken = r.get_today_taken_by_agent(current_user.id) %}
-                {% set remaining = r.daily_limit - today_taken if r.daily_limit > 0 else 999999 %}
+                {% set remaining = (r.daily_limit - today_taken) if r.daily_limit > 0 else 999999 %}
                 <tr style="border-bottom:1px solid var(--border); transition:background .15s;" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
-                    <td style="padding:12px 16px;"><strong>{{ r.country }}</strong>
+                    <td style="padding:12px 16px;">
+                        <strong>{{ r.country }}</strong>
                         {% if r.operator %}<br><span style="color:var(--muted); font-size:11px;">{{ r.operator }}</span>{% endif %}
                     </td>
                     <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">+{{ r.prefix }}</td>
+                    <td style="padding:12px 16px;">
+                        {% if r.payout > 0 %}
+                        <span style="color:var(--success); font-weight:700;">${{ '%.4f'|format(r.payout) }}</span>
+                        {% else %}
+                        <span style="color:var(--muted);">—</span>
+                        {% endif %}
+                    </td>
                     <td style="padding:12px 16px;">
                         {% if r.daily_limit > 0 %}
                         <span style="color:var(--warn); font-weight:700;">{{ r.daily_limit }}</span>/day
@@ -49,7 +58,7 @@
                             {% if remaining > 0 %}
                             <span style="color:var(--success); font-weight:700;">{{ remaining }}</span>
                             {% else %}
-                            <span style="color:var(--danger); font-weight:700;">0 (Limit reached)</span>
+                            <span style="color:var(--danger); font-weight:700;">0</span>
                             {% endif %}
                         {% else %}
                         <span style="color:var(--success);">Unlimited</span>
@@ -72,6 +81,14 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% if not ranges %}
+                <tr>
+                    <td colspan="7" style="padding:40px; text-align:center; color:var(--muted);">
+                        <i class="fa fa-inbox" style="font-size:32px; display:block; margin-bottom:10px;"></i>
+                        No ranges available.
+                    </td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
