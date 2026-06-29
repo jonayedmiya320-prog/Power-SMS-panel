@@ -1,72 +1,79 @@
 {% extends "base.html" %}
+{% block title %}Add Numbers{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Add Numbers to Your Account</h3>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <strong>Current Status:</strong><br>
-                        Numbers you have: <strong>{{ current_numbers }}</strong> / {{ max_numbers }} maximum<br>
-                        <div class="progress mt-2" style="height: 20px;">
-                            <div class="progress-bar" role="progressbar"
-                                 style="width: {{ (current_numbers / max_numbers * 100)|round }}%;"
-                                 aria-valuenow="{{ current_numbers }}"
-                                 aria-valuemin="0"
-                                 aria-valuemax="{{ max_numbers }}">
-                                {{ current_numbers }} / {{ max_numbers }}
-                            </div>
-                        </div>
-                    </div>
+<div style="margin-bottom:16px;">
+    <h4 style="margin:0; color:var(--accent);"><i class="fa fa-plus-circle"></i> Add Numbers to My Account</h4>
+    <p style="color:var(--muted); font-size:13px; margin-top:6px;">Range থেকে নাম্বার নিন। Daily limit অনুযায়ী নেওয়া যাবে।</p>
+</div>
 
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}">{{ message }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-                    <form method="POST">
-                        <div class="form-group">
-                            <label for="range_id">Select Range</label>
-                            <select name="range_id" id="range_id" class="form-control" required>
-                                <option value="">-- Select Range --</option>
-                                {% for range in ranges %}
-                                <option value="{{ range.id }}">
-                                    {{ range.prefix }} - {{ range.country }}
-                                    ({{ range.numbers.filter_by(agent_id=None).count() }} available)
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="numbers_count">Number of Numbers to Add</label>
-                            <input type="number" name="numbers_count" id="numbers_count"
-                                   class="form-control" value="1" min="1" max="500" required>
-                            <small class="form-text text-muted">
-                                Maximum 500 numbers at a time.
-                                {% if current_numbers < 500 %}
-                                You can add up to {{ 500 - current_numbers }} more numbers.
-                                {% endif %}
-                            </small>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add Numbers
-                        </button>
-                        <a href="{{ url_for('admin.agent_my_numbers') }}" class="btn btn-secondary">
-                            <i class="fas fa-list"></i> View My Numbers
-                        </a>
-                    </form>
-                </div>
-            </div>
+<div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px;">
+    <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+        <div style="background:var(--hover); border:1px solid var(--border); border-radius:8px; padding:14px 20px; text-align:center;">
+            <div style="font-size:24px; font-weight:800; color:var(--accent);">{{ current_numbers }}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">Total Numbers</div>
         </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Country</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Prefix</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Daily Limit</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Today Taken</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Remaining Today</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Take Numbers</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in ranges %}
+                {% set today_taken = r.get_today_taken_by_agent(current_user.id) %}
+                {% set remaining = r.daily_limit - today_taken if r.daily_limit > 0 else 999999 %}
+                <tr style="border-bottom:1px solid var(--border); transition:background .15s;" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
+                    <td style="padding:12px 16px;"><strong>{{ r.country }}</strong>
+                        {% if r.operator %}<br><span style="color:var(--muted); font-size:11px;">{{ r.operator }}</span>{% endif %}
+                    </td>
+                    <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">+{{ r.prefix }}</td>
+                    <td style="padding:12px 16px;">
+                        {% if r.daily_limit > 0 %}
+                        <span style="color:var(--warn); font-weight:700;">{{ r.daily_limit }}</span>/day
+                        {% else %}
+                        <span style="color:var(--success);">Unlimited</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding:12px 16px; color:var(--txt);">{{ today_taken }}</td>
+                    <td style="padding:12px 16px;">
+                        {% if r.daily_limit > 0 %}
+                            {% if remaining > 0 %}
+                            <span style="color:var(--success); font-weight:700;">{{ remaining }}</span>
+                            {% else %}
+                            <span style="color:var(--danger); font-weight:700;">0 (Limit reached)</span>
+                            {% endif %}
+                        {% else %}
+                        <span style="color:var(--success);">Unlimited</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding:12px 16px;">
+                        {% if remaining > 0 %}
+                        <form method="POST" action="{{ url_for('admin.agent_add_numbers') }}" style="display:flex; gap:6px; align-items:center;">
+                            <input type="hidden" name="range_id" value="{{ r.id }}">
+                            <input type="number" name="numbers_count" value="25" min="1"
+                                {% if r.daily_limit > 0 %}max="{{ remaining }}"{% endif %}
+                                style="width:70px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:5px 8px; font-size:13px;">
+                            <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer;">
+                                <i class="fa fa-plus"></i> Take
+                            </button>
+                        </form>
+                        {% else %}
+                        <span style="color:var(--danger); font-size:12px;">Limit reached today</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
