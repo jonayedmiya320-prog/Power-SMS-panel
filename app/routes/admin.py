@@ -714,6 +714,8 @@ def agent_add_numbers():
         flash(f'{numbers_added} numbers added successfully!', 'success')
         return redirect(url_for('admin.agent_my_numbers'))
 
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 25, type=int)
     search = request.args.get('search', '')
     ranges_query = SMDRange.query.filter_by(is_active=True)
     if search:
@@ -724,11 +726,29 @@ def agent_add_numbers():
                 SMDRange.prefix.like(f'%{search}%')
             )
         )
-    ranges = ranges_query.all()
+    ranges_query = ranges_query.order_by(SMDRange.country)
+
+    if per_page == 99999:
+        all_ranges = ranges_query.all()
+        class FakePaginate:
+            def __init__(self, items):
+                self.items = items
+                self.total = len(items)
+                self.page = 1
+                self.pages = 1
+                self.has_prev = False
+                self.has_next = False
+                self.prev_num = None
+                self.next_num = None
+        ranges = FakePaginate(all_ranges)
+    else:
+        ranges = ranges_query.paginate(page=page, per_page=per_page, error_out=False)
+
     current_numbers = SMSNumber.query.filter_by(agent_id=current_user.id).count()
     return render_template('admin/agent_add_numbers.html',
         ranges=ranges,
-        current_numbers=current_numbers
+        current_numbers=current_numbers,
+        per_page=per_page
     )
 
 @admin_bp.route('/agent/my-numbers')
