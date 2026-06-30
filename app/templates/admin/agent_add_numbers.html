@@ -16,9 +16,16 @@
     </div>
 
     <!-- Search/Filter -->
-    <form method="GET" style="display:flex; gap:8px; margin-bottom:18px;">
+    <form method="GET" id="filterForm" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;">
         <input type="text" name="search" value="{{ request.args.get('search','') }}" placeholder="Search range or country..."
-            style="flex:1; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:8px 12px; font-size:13px;">
+            style="flex:1; min-width:160px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:8px 12px; font-size:13px;">
+        <select name="per_page" onchange="document.getElementById('filterForm').submit()"
+            style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:8px 12px; font-size:13px;">
+            {% for n in [25, 50, 100, 500] %}
+            <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
+            <option value="99999" {% if per_page == 99999 %}selected{% endif %}>All</option>
+        </select>
         <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:700; cursor:pointer;">
             <i class="fa fa-search"></i> Search
         </button>
@@ -39,7 +46,8 @@
                 </tr>
             </thead>
             <tbody>
-                {% for r in ranges %}
+                {% if ranges.items %}
+                {% for r in ranges.items %}
                 {% set today_taken = r.get_today_taken_by_agent(current_user.id) %}
                 {% set remaining = (r.daily_limit - today_taken) if r.daily_limit > 0 else 999999 %}
                 <tr style="border-bottom:1px solid var(--border); transition:background .15s;" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
@@ -78,14 +86,24 @@
                     </td>
                     <td style="padding:12px 16px;">
                         {% if remaining > 0 %}
-                        <form method="POST" action="{{ url_for('admin.agent_add_numbers') }}" style="display:flex; gap:6px; align-items:center;">
+                        <form method="POST" action="{{ url_for('admin.agent_add_numbers') }}" style="display:flex; flex-direction:column; gap:6px;">
                             <input type="hidden" name="range_id" value="{{ r.id }}">
-                            <input type="number" name="numbers_count" value="25" min="1"
-                                {% if r.daily_limit > 0 %}max="{{ remaining }}"{% endif %}
-                                style="width:70px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:5px 8px; font-size:13px;">
-                            <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer;">
-                                <i class="fa fa-plus"></i> Take
-                            </button>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" name="numbers_count" id="count-{{ r.id }}" value="25" min="1"
+                                    {% if r.daily_limit > 0 %}max="{{ remaining }}"{% endif %}
+                                    style="width:70px; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:5px 8px; font-size:13px;">
+                                <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer;">
+                                    <i class="fa fa-plus"></i> Take
+                                </button>
+                            </div>
+                            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                                {% for amt in [25, 50, 100, 500] %}
+                                <button type="button" onclick="document.getElementById('count-{{ r.id }}').value={{ amt }}"
+                                    style="background:var(--hover); color:var(--muted); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:11px; cursor:pointer;">{{ amt }}</button>
+                                {% endfor %}
+                                <button type="button" onclick="document.getElementById('count-{{ r.id }}').value={{ remaining if remaining < 999999 else 100000 }}"
+                                    style="background:var(--hover); color:var(--muted); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:11px; cursor:pointer;">All</button>
+                            </div>
                         </form>
                         {% else %}
                         <span style="color:var(--danger); font-size:12px;">Limit reached</span>
@@ -93,7 +111,7 @@
                     </td>
                 </tr>
                 {% endfor %}
-                {% if not ranges %}
+                {% else %}
                 <tr>
                     <td colspan="8" style="padding:40px; text-align:center; color:var(--muted);">
                         <i class="fa fa-inbox" style="font-size:32px; display:block; margin-bottom:10px;"></i>
@@ -104,5 +122,25 @@
             </tbody>
         </table>
     </div>
+
+    {% if ranges.pages > 1 %}
+    <div style="padding:14px 0 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <span style="font-size:13px; color:var(--muted);">Page {{ ranges.page }} of {{ ranges.pages }} — {{ ranges.total }} total</span>
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            {% if ranges.has_prev %}
+            <a href="{{ url_for('admin.agent_add_numbers', page=ranges.prev_num, search=request.args.get('search',''), per_page=per_page) }}"
+               style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:5px 12px; text-decoration:none; font-size:13px;">‹ Prev</a>
+            {% endif %}
+            {% for p in range([1, ranges.page-2]|max, [ranges.pages+1, ranges.page+3]|min) %}
+            <a href="{{ url_for('admin.agent_add_numbers', page=p, search=request.args.get('search',''), per_page=per_page) }}"
+               style="background:{% if p == ranges.page %}var(--accent){% else %}var(--hover){% endif %}; color:{% if p == ranges.page %}#000{% else %}var(--txt){% endif %}; border:1px solid var(--border); border-radius:6px; padding:5px 12px; text-decoration:none; font-size:13px;">{{ p }}</a>
+            {% endfor %}
+            {% if ranges.has_next %}
+            <a href="{{ url_for('admin.agent_add_numbers', page=ranges.next_num, search=request.args.get('search',''), per_page=per_page) }}"
+               style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:5px 12px; text-decoration:none; font-size:13px;">Next ›</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
