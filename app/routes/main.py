@@ -88,6 +88,32 @@ def sms_ranges():
     return render_template('main/sms_ranges.html', ranges=ranges)
 
 
+@main_bp.route('/agent/SMSTestPanel')
+@login_required
+def sms_test_panel():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 25, type=int)
+    frange = request.args.get('frange', '')
+
+    cdr_query = SMSCDR.query
+
+    if frange:
+        cdr_query = cdr_query.filter_by(range_id=frange)
+
+    cdr_records = cdr_query.order_by(SMSCDR.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    total_sms = SMSCDR.query.count()
+    ranges = SMDRange.query.filter_by(is_active=True).order_by(SMDRange.country).all()
+
+    return render_template('main/sms_test_panel.html',
+        cdr_records=cdr_records,
+        total_sms=total_sms,
+        ranges=ranges
+    )
+
+
 @main_bp.route('/agent/MyAssignedNumbers')
 @login_required
 def client_my_numbers():
