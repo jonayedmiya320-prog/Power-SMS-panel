@@ -713,7 +713,18 @@ def agent_add_numbers():
         )
         flash(f'{numbers_added} numbers added successfully!', 'success')
         return redirect(url_for('admin.agent_my_numbers'))
-    ranges = SMDRange.query.filter_by(is_active=True).all()
+
+    search = request.args.get('search', '')
+    ranges_query = SMDRange.query.filter_by(is_active=True)
+    if search:
+        ranges_query = ranges_query.filter(
+            db.or_(
+                SMDRange.name.like(f'%{search}%'),
+                SMDRange.country.like(f'%{search}%'),
+                SMDRange.prefix.like(f'%{search}%')
+            )
+        )
+    ranges = ranges_query.all()
     current_numbers = SMSNumber.query.filter_by(agent_id=current_user.id).count()
     return render_template('admin/agent_add_numbers.html',
         ranges=ranges,
@@ -795,16 +806,23 @@ def agent_bulk_assign():
         flash('Invalid client!', 'danger')
         return redirect(url_for('admin.agent_my_numbers'))
     assigned = 0
+    skipped = 0
     for nid in number_ids:
         num = SMSNumber.query.get(int(nid))
         if num and num.agent_id == current_user.id:
+            if num.client_id and num.client_id != client_id:
+                skipped += 1
+                continue
             num.client_id = client_id
             num.client_payout = client_payout
             num.status = 'activated'
             num.assigned_at = datetime.utcnow()
             assigned += 1
     db.session.commit()
-    flash(f'{assigned} numbers assigned to {client.username} at ${client_payout}/OTP!', 'success')
+    msg = f'{assigned} numbers assigned to {client.username} at ${client_payout}/OTP!'
+    if skipped > 0:
+        msg += f' ({skipped} skipped — already assigned to another client)'
+    flash(msg, 'success')
     return redirect(url_for('admin.agent_my_numbers'))
 
 @admin_bp.route('/agent/bulk-unassign', methods=['POST'])
