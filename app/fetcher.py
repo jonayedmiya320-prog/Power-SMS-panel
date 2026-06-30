@@ -61,21 +61,23 @@ def _detect_otp(text):
 def _save_otp(app, provider_id, number, otp, sender, message):
     with app.app_context():
         from app.models.provider import OTPLog
-        from app.models.sms import SMSNumber
+        from app.models.sms import SMSNumber, SMSCDR
         from app import db
 
         num_clean = re.sub(r"\D", "", str(number))
 
+        # ── Duplicate check: same number + same OTP = always duplicate ──
+        # No time window — if this exact OTP for this exact number was ever
+        # logged before, skip it. Only a DIFFERENT OTP on the same number
+        # counts as a new entry.
         existing = OTPLog.query.filter_by(
             number=num_clean,
-            otp=otp,
-            provider_id=provider_id
-        ).order_by(OTPLog.received_at.desc()).first()
+            otp=otp
+        ).first()
 
         if existing:
-            diff = (datetime.utcnow() - existing.received_at).total_seconds()
-            if diff < 120:
-                return
+            log.info(f"Duplicate OTP skipped: {num_clean} → {otp}")
+            return
 
         sms_number = SMSNumber.query.filter(
             SMSNumber.number.like(f"%{num_clean[-10:]}")
@@ -95,8 +97,32 @@ def _save_otp(app, provider_id, number, otp, sender, message):
             user_id=user_id
         )
         db.session.add(entry)
+
+        # ── Also write into SMSCDR so Agent CDR Reports + SMS Test Panel ──
+        # show this OTP. Without this, only the Admin OTP Logs page sees it.
+        if sms_number:
+            cdr = SMSCDR(
+                number_id=sms_number.id,
+                range_id=sms_number.range_id,
+                user_id=sms_number.agent_id,
+                client_id=sms_number.client_id,
+                caller_id=sender,
+                destination=num_clean,
+                cli=sender,
+                message=message,
+                created_at=datetime.utcnow(),
+                currency='USD',
+                agent_payout=sms_number.agent_payout or 0.0,
+                client_payout=sms_number.client_payout or 0.0,
+                profit=(sms_number.client_payout or 0.0) - (sms_number.agent_payout or 0.0),
+                sms_type='received',
+                status='completed'
+            )
+            db.session.add(cdr)
+
         db.session.commit()
         log.info(f"OTP saved: {num_clean} → {otp}")
+
 
 def _fetch_loop(app, provider_id, stop_event):
     session_info = None
