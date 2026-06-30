@@ -293,6 +293,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ url_for('admin.agent_otp_stats') }}"
+                       class="sb-link {% if request.endpoint == 'admin.agent_otp_stats' %}active{% endif %}">
+                        <i class="fa fa-bar-chart"></i> Agent OTP Stats
+                    </a>
+                </li>
+                <li>
                     <a href="{{ url_for('admin.sms_cdr') }}"
                        class="sb-link {% if request.endpoint == 'admin.sms_cdr' %}active{% endif %}">
                         <i class="fa fa-file-text"></i> CDR
