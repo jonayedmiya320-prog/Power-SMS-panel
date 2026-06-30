@@ -607,6 +607,63 @@ def set_range_payout(range_id):
     flash(f'{sms_range.country} payout set to ${payout:.4f}/OTP!', 'success')
     return redirect(url_for('admin.sms_ranges'))
 
+# ============ AGENT OTP STATS ============
+
+@admin_bp.route('/agent-otp-stats')
+@admin_required
+def agent_otp_stats():
+    from app.models.provider import OTPLog
+    today = datetime.utcnow().date()
+    week_ago = today - timedelta(days=7)
+    first_of_month = today.replace(day=1)
+
+    agents = User.query.filter(User.role.has(name='agent')).all()
+
+    stats = []
+    for agent in agents:
+        agent_number_ids = [n.id for n in SMSNumber.query.filter_by(agent_id=agent.id).all()]
+
+        if not agent_number_ids:
+            stats.append({
+                'agent': agent,
+                'today': 0,
+                'week': 0,
+                'month': 0,
+                'total': 0
+            })
+            continue
+
+        today_count = OTPLog.query.filter(
+            OTPLog.number_id.in_(agent_number_ids),
+            db.func.date(OTPLog.received_at) == today
+        ).count()
+
+        week_count = OTPLog.query.filter(
+            OTPLog.number_id.in_(agent_number_ids),
+            OTPLog.received_at >= week_ago
+        ).count()
+
+        month_count = OTPLog.query.filter(
+            OTPLog.number_id.in_(agent_number_ids),
+            OTPLog.received_at >= first_of_month
+        ).count()
+
+        total_count = OTPLog.query.filter(
+            OTPLog.number_id.in_(agent_number_ids)
+        ).count()
+
+        stats.append({
+            'agent': agent,
+            'today': today_count,
+            'week': week_count,
+            'month': month_count,
+            'total': total_count
+        })
+
+    stats.sort(key=lambda x: x['total'], reverse=True)
+
+    return render_template('admin/agent_otp_stats.html', stats=stats)
+
 # ============ ADD NUMBERS TO AGENT ============
 
 @admin_bp.route('/add-numbers-to-agent', methods=['GET', 'POST'])
