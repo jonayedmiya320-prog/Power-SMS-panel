@@ -88,6 +88,48 @@ def sms_ranges():
     return render_template('main/sms_ranges.html', ranges=ranges)
 
 
+@main_bp.route('/agent/MyAssignedNumbers')
+@login_required
+def client_my_numbers():
+    if not current_user.is_client():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 25, type=int)
+    search = request.args.get('search', '')
+
+    query = SMSNumber.query.filter_by(client_id=current_user.id)
+    if search:
+        query = query.filter(SMSNumber.number.like(f'%{search}%'))
+
+    if per_page == 99999:
+        all_numbers = query.order_by(SMSNumber.number).all()
+        class FakePaginate:
+            def __init__(self, items):
+                self.items = items
+                self.total = len(items)
+                self.page = 1
+                self.pages = 1
+                self.has_prev = False
+                self.has_next = False
+                self.prev_num = None
+                self.next_num = None
+        numbers = FakePaginate(all_numbers)
+    else:
+        numbers = query.order_by(SMSNumber.number).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+
+    total_numbers = SMSNumber.query.filter_by(client_id=current_user.id).count()
+
+    return render_template('main/client_numbers.html',
+        numbers=numbers,
+        total_numbers=total_numbers,
+        per_page=per_page
+    )
+
+
 @main_bp.route('/agent/SMSCDRReports')
 @login_required
 def sms_cdr_reports():
