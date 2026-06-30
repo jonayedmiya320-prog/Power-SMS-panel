@@ -197,6 +197,17 @@
         </li>
         {% endif %}
 
+        {% if current_user.is_client() %}
+        <div class="sb-divider"></div>
+        <div class="sb-label">My Account</div>
+        <li>
+            <a href="{{ url_for('main.client_my_numbers') }}"
+               class="sb-link {% if request.endpoint == 'main.client_my_numbers' %}active{% endif %}">
+                <i class="fa fa-list-ol"></i> My Numbers
+            </a>
+        </li>
+        {% endif %}
+
         <div class="sb-divider"></div>
         <div class="sb-label">Reports</div>
         <li>
