@@ -98,10 +98,13 @@ def client_my_numbers():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 25, type=int)
     search = request.args.get('search', '')
+    frange = request.args.get('frange', '')
 
     query = SMSNumber.query.filter_by(client_id=current_user.id)
     if search:
         query = query.filter(SMSNumber.number.like(f'%{search}%'))
+    if frange:
+        query = query.filter_by(range_id=frange)
 
     if per_page == 99999:
         all_numbers = query.order_by(SMSNumber.number).all()
@@ -123,10 +126,45 @@ def client_my_numbers():
 
     total_numbers = SMSNumber.query.filter_by(client_id=current_user.id).count()
 
+    range_ids = db.session.query(SMSNumber.range_id).filter_by(client_id=current_user.id).distinct().all()
+    range_ids = [r[0] for r in range_ids]
+    ranges = SMDRange.query.filter(SMDRange.id.in_(range_ids)).all() if range_ids else []
+
     return render_template('main/client_numbers.html',
         numbers=numbers,
         total_numbers=total_numbers,
-        per_page=per_page
+        per_page=per_page,
+        ranges=ranges
+    )
+
+
+@main_bp.route('/agent/DownloadMyAssignedNumbers')
+@login_required
+def client_download_numbers():
+    if not current_user.is_client():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    numbers = SMSNumber.query.filter_by(client_id=current_user.id).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Number', 'Range', 'OTP Price', 'Status', 'Assigned Date'])
+
+    for num in numbers:
+        writer.writerow([
+            num.number,
+            f"+{num.sms_range.prefix} - {num.sms_range.country}" if num.sms_range else '',
+            num.client_payout,
+            num.status,
+            num.assigned_at.strftime('%Y-%m-%d %H:%M') if num.assigned_at else ''
+        ])
+
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=my_numbers.csv'}
     )
 
 
