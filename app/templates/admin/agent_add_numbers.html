@@ -15,10 +15,20 @@
         </div>
     </div>
 
+    <!-- Search/Filter -->
+    <form method="GET" style="display:flex; gap:8px; margin-bottom:18px;">
+        <input type="text" name="search" value="{{ request.args.get('search','') }}" placeholder="Search range or country..."
+            style="flex:1; background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:8px 12px; font-size:13px;">
+        <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:700; cursor:pointer;">
+            <i class="fa fa-search"></i> Search
+        </button>
+    </form>
+
     <div style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
             <thead>
                 <tr style="border-bottom:1px solid var(--border);">
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Range Name</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Country</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Prefix</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Payout / OTP</th>
@@ -34,10 +44,12 @@
                 {% set remaining = (r.daily_limit - today_taken) if r.daily_limit > 0 else 999999 %}
                 <tr style="border-bottom:1px solid var(--border); transition:background .15s;" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
                     <td style="padding:12px 16px;">
-                        <strong>{{ r.country }}</strong>
+                        <strong style="color:var(--accent);">{{ r.name if r.name else (r.prefix + ' - ' + r.country) }}</strong>
+                    </td>
+                    <td style="padding:12px 16px;">{{ r.country }}
                         {% if r.operator %}<br><span style="color:var(--muted); font-size:11px;">{{ r.operator }}</span>{% endif %}
                     </td>
-                    <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">+{{ r.prefix }}</td>
+                    <td style="padding:12px 16px; font-family:monospace; color:var(--txt);">+{{ r.prefix }}</td>
                     <td style="padding:12px 16px;">
                         {% if r.payout > 0 %}
                         <span style="color:var(--success); font-weight:700;">${{ '%.4f'|format(r.payout) }}</span>
@@ -76,14 +88,14 @@
                             </button>
                         </form>
                         {% else %}
-                        <span style="color:var(--danger); font-size:12px;">Limit reached today</span>
+                        <span style="color:var(--danger); font-size:12px;">Limit reached</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
                 {% if not ranges %}
                 <tr>
-                    <td colspan="7" style="padding:40px; text-align:center; color:var(--muted);">
+                    <td colspan="8" style="padding:40px; text-align:center; color:var(--muted);">
                         <i class="fa fa-inbox" style="font-size:32px; display:block; margin-bottom:10px;"></i>
                         No ranges available.
                     </td>
