@@ -25,3 +25,4 @@ class OTPLog(db.Model):
     number_id   = db.Column(db.Integer, db.ForeignKey('sms_numbers.id'), nullable=True)
     user_id     = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     provider    = db.relationship('Provider', backref='otp_logs')
+    sms_number  = db.relationship('SMSNumber', foreign_keys=[number_id])
