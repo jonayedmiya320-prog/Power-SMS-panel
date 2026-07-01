@@ -40,7 +40,7 @@
             <select name="frange" style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px;">
                 <option value="">All Ranges</option>
                 {% for r in ranges %}
-                <option value="{{ r.id }}" {% if request.args.get('frange') == r.id|string %}selected{% endif %}>+{{ r.prefix }} — {{ r.country }}</option>
+                <option value="{{ r.id }}" {% if request.args.get('frange') == r.id|string %}selected{% endif %}>+{{ r.prefix }} — {{ r.country }}{% if r.operator %} ({{ r.operator }}){% endif %}</option>
                 {% endfor %}
             </select>
         </div>
@@ -99,7 +99,7 @@
                     <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">{{ cdr.sms_number.number if cdr.sms_number else '—' }}</td>
                     <td style="padding:12px 16px; color:var(--muted); font-size:12px; white-space:nowrap;">{{ cdr.created_at.strftime('%Y-%m-%d %H:%M:%S') if cdr.created_at else '—' }}</td>
                     <td style="padding:12px 16px; color:var(--txt); white-space:nowrap;">{{ cdr.cli or '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--muted); white-space:nowrap;">{{ cdr.range_info.country if cdr.range_info else '—' }}</td>
+                    <td style="padding:12px 16px; color:var(--muted); white-space:nowrap;">{% if cdr.range_info %}{{ cdr.range_info.country }}{% if cdr.range_info.operator %} ({{ cdr.range_info.operator }}){% endif %}{% else %}—{% endif %}</td>
                     <td style="padding:12px 16px; color:var(--txt); word-wrap:break-word; white-space:normal; min-width:200px;">{{ cdr.message if cdr.message else '—' }}</td>
                     {% if not current_user.is_client() %}
                     <td style="padding:12px 16px; color:var(--success); white-space:nowrap;">${{ '%.4f'|format(cdr.agent_payout|float if cdr.agent_payout else 0) }}</td>
