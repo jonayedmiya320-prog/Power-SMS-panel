@@ -11,10 +11,12 @@
         <div style="font-size:11px; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">Total SMS</div>
         <div style="font-size:22px; font-weight:800; color:var(--accent);">{{ totals.total_sms if totals and totals.total_sms else 0 }}</div>
     </div>
+    {% if not current_user.is_client() %}
     <div style="background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 16px;">
         <div style="font-size:11px; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">Agent Payout</div>
         <div style="font-size:22px; font-weight:800; color:var(--success);">${{ '%.4f'|format(totals.total_payout|float if totals and totals.total_payout else 0) }}</div>
     </div>
+    {% endif %}
     <div style="background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 16px;">
         <div style="font-size:11px; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">Client Cost</div>
         <div style="font-size:22px; font-weight:800; color:var(--warn);">${{ '%.4f'|format(totals.total_client|float if totals and totals.total_client else 0) }}</div>
@@ -22,7 +24,7 @@
 </div>
 
 <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:16px;">
-    <form method="GET" action="{{ url_for('main.sms_cdr_reports') }}" style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
+    <form method="GET" action="{{ url_for('main.sms_cdr_reports') }}" id="filterForm" style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
         <div>
             <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">FROM</label>
             <input type="date" name="fdate1" value="{{ fdate1[:10] if fdate1 else '' }}"
@@ -42,6 +44,7 @@
                 {% endfor %}
             </select>
         </div>
+        {% if not current_user.is_client() %}
         <div>
             <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">CLIENT</label>
             <select name="fclient" style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px;">
@@ -51,10 +54,20 @@
                 {% endfor %}
             </select>
         </div>
+        {% endif %}
         <div>
             <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">NUMBER</label>
             <input type="text" name="fnum" value="{{ request.args.get('fnum','') }}" placeholder="Number..."
                 style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px; width:130px;">
+        </div>
+        <div>
+            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:4px;">SHOW</label>
+            <select name="per_page" onchange="document.getElementById('filterForm').submit()"
+                style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px;">
+                {% for n in [25, 50, 100] %}
+                <option value="{{ n }}" {% if request.args.get('per_page', '25') == n|string %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+            </select>
         </div>
         <button type="submit" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:700; cursor:pointer;">
             <i class="fa fa-search"></i> Search
@@ -72,7 +85,11 @@
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">CLI</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Range</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Message</th>
+                    {% if not current_user.is_client() %}
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Agent Payout</th>
+                    {% else %}
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">OTP Price</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -80,11 +97,15 @@
                 {% for cdr in cdr_records.items %}
                 <tr style="border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
                     <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">{{ cdr.sms_number.number if cdr.sms_number else '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--muted); font-size:12px;">{{ cdr.created_at.strftime('%Y-%m-%d %H:%M') if cdr.created_at else '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--txt);">{{ cdr.cli or '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--muted);">{{ cdr.range_info.country if cdr.range_info else '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--txt); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ cdr.message[:60] if cdr.message else '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--success);">${{ '%.4f'|format(cdr.agent_payout|float if cdr.agent_payout else 0) }}</td>
+                    <td style="padding:12px 16px; color:var(--muted); font-size:12px; white-space:nowrap;">{{ cdr.created_at.strftime('%Y-%m-%d %H:%M:%S') if cdr.created_at else '—' }}</td>
+                    <td style="padding:12px 16px; color:var(--txt); white-space:nowrap;">{{ cdr.cli or '—' }}</td>
+                    <td style="padding:12px 16px; color:var(--muted); white-space:nowrap;">{{ cdr.range_info.country if cdr.range_info else '—' }}</td>
+                    <td style="padding:12px 16px; color:var(--txt); word-wrap:break-word; white-space:normal; min-width:200px;">{{ cdr.message if cdr.message else '—' }}</td>
+                    {% if not current_user.is_client() %}
+                    <td style="padding:12px 16px; color:var(--success); white-space:nowrap;">${{ '%.4f'|format(cdr.agent_payout|float if cdr.agent_payout else 0) }}</td>
+                    {% else %}
+                    <td style="padding:12px 16px; color:var(--success); white-space:nowrap;">${{ '%.4f'|format(cdr.client_payout|float if cdr.client_payout else 0) }}</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -98,14 +119,18 @@
 
     {% if cdr_records.pages > 1 %}
     <div style="padding:14px 16px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-        <span style="font-size:13px; color:var(--muted);">Page {{ cdr_records.page }} of {{ cdr_records.pages }}</span>
-        <div style="display:flex; gap:4px;">
+        <span style="font-size:13px; color:var(--muted);">Page {{ cdr_records.page }} of {{ cdr_records.pages }} — {{ cdr_records.total }} total</span>
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
             {% if cdr_records.has_prev %}
-            <a href="{{ url_for('main.sms_cdr_reports', page=cdr_records.prev_num, fdate1=fdate1, fdate2=fdate2) }}"
+            <a href="{{ url_for('main.sms_cdr_reports', page=cdr_records.prev_num, fdate1=fdate1, fdate2=fdate2, frange=request.args.get('frange',''), fclient=request.args.get('fclient',''), fnum=request.args.get('fnum',''), per_page=request.args.get('per_page','25')) }}"
                style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:5px 12px; text-decoration:none; font-size:13px;">‹ Prev</a>
             {% endif %}
+            {% for p in range([1, cdr_records.page-2]|max, [cdr_records.pages+1, cdr_records.page+3]|min) %}
+            <a href="{{ url_for('main.sms_cdr_reports', page=p, fdate1=fdate1, fdate2=fdate2, frange=request.args.get('frange',''), fclient=request.args.get('fclient',''), fnum=request.args.get('fnum',''), per_page=request.args.get('per_page','25')) }}"
+               style="background:{% if p == cdr_records.page %}var(--accent){% else %}var(--hover){% endif %}; color:{% if p == cdr_records.page %}#000{% else %}var(--txt){% endif %}; border:1px solid var(--border); border-radius:6px; padding:5px 12px; text-decoration:none; font-size:13px;">{{ p }}</a>
+            {% endfor %}
             {% if cdr_records.has_next %}
-            <a href="{{ url_for('main.sms_cdr_reports', page=cdr_records.next_num, fdate1=fdate1, fdate2=fdate2) }}"
+            <a href="{{ url_for('main.sms_cdr_reports', page=cdr_records.next_num, fdate1=fdate1, fdate2=fdate2, frange=request.args.get('frange',''), fclient=request.args.get('fclient',''), fnum=request.args.get('fnum',''), per_page=request.args.get('per_page','25')) }}"
                style="background:var(--hover); color:var(--txt); border:1px solid var(--border); border-radius:6px; padding:5px 12px; text-decoration:none; font-size:13px;">Next ›</a>
             {% endif %}
         </div>
