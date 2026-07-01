@@ -851,7 +851,12 @@ def agent_my_numbers():
         SMSNumber.client_id.isnot(None)
     ).count()
     free_count = total_numbers - assigned_count
-    ranges = SMDRange.query.filter_by(is_active=True).all()
+    range_ids = [
+        r[0] for r in db.session.query(SMSNumber.range_id)
+        .filter(SMSNumber.agent_id == current_user.id, SMSNumber.range_id.isnot(None))
+        .distinct().all()
+    ]
+    ranges = SMDRange.query.filter(SMDRange.id.in_(range_ids)).all() if range_ids else []
     clients = User.query.filter_by(agent_id=current_user.id).all()
     return render_template('admin/agent_my_numbers.html',
         numbers=numbers,
