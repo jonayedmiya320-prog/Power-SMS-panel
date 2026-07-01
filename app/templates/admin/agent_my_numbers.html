@@ -26,7 +26,7 @@
                 style="background:var(--hover); border:1px solid var(--border); color:var(--txt); border-radius:6px; padding:7px 12px; font-size:13px;">
                 <option value="">All Ranges</option>
                 {% for r in ranges %}
-                <option value="{{ r.id }}" {% if request.args.get('frange') == r.id|string %}selected{% endif %}>+{{ r.prefix }} - {{ r.country }}</option>
+                <option value="{{ r.id }}" {% if request.args.get('frange') == r.id|string %}selected{% endif %}>+{{ r.prefix }} — {{ r.country }}{% if r.operator %} ({{ r.operator }}){% endif %}</option>
                 {% endfor %}
             </select>
         </div>
@@ -109,7 +109,7 @@
                         </td>
                         <td style="padding:10px 16px;"><strong style="color:var(--accent); font-family:monospace;">{{ num.number }}</strong></td>
                         <td style="padding:10px 16px; color:var(--muted);">
-                            {% if num.sms_range %}+{{ num.sms_range.prefix }} — {{ num.sms_range.country }}{% else %}N/A{% endif %}
+                            {% if num.sms_range %}+{{ num.sms_range.prefix }} — {{ num.sms_range.country }}{% if num.sms_range.operator %} ({{ num.sms_range.operator }}){% endif %}{% else %}N/A{% endif %}
                         </td>
                         <td style="padding:10px 16px;">
                             {% if num.client %}<span style="color:var(--success);">{{ num.client.username }}</span>
