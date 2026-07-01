@@ -55,7 +55,7 @@
                     <td style="padding:12px 16px; font-family:monospace; color:var(--accent);">{{ cdr.sms_number.number if cdr.sms_number else '—' }}</td>
                     <td style="padding:12px 16px; color:var(--muted); font-size:12px;">{{ cdr.created_at.strftime('%Y-%m-%d %H:%M') if cdr.created_at else '—' }}</td>
                     <td style="padding:12px 16px; color:var(--txt);">{{ cdr.cli or '—' }}</td>
-                    <td style="padding:12px 16px; color:var(--muted);">{{ cdr.range_info.country if cdr.range_info else '—' }}</td>
+                    <td style="padding:12px 16px; color:var(--muted);">{% if cdr.range_info %}{{ cdr.range_info.country }}{% if cdr.range_info.operator %} ({{ cdr.range_info.operator }}){% endif %}{% else %}—{% endif %}</td>
                     <td style="padding:12px 16px; color:var(--txt); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ cdr.message[:60] if cdr.message else '—' }}</td>
                     <td style="padding:12px 16px; color:var(--success);">${{ '%.4f'|format(cdr.profit|float if cdr.profit else 0) }}</td>
                 </tr>
