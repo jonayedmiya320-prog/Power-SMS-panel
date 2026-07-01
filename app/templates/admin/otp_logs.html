@@ -17,6 +17,7 @@
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Time</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Number</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">OTP</th>
+                    <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Range</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Sender</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Message</th>
                     <th style="padding:12px 16px; text-align:left; color:var(--muted); font-weight:600;">Provider</th>
@@ -31,6 +32,9 @@
                     <td style="padding:12px 16px;">
                         <span style="background:var(--success); color:#000; border-radius:4px; padding:3px 10px; font-weight:700; font-size:13px;">{{ l.otp }}</span>
                     </td>
+                    <td style="padding:12px 16px; color:var(--muted); white-space:nowrap;">
+                        {% if l.sms_number and l.sms_number.sms_range %}+{{ l.sms_number.sms_range.prefix }} — {{ l.sms_number.sms_range.country }}{% if l.sms_number.sms_range.operator %} ({{ l.sms_number.sms_range.operator }}){% endif %}{% else %}—{% endif %}
+                    </td>
                     <td style="padding:12px 16px; color:var(--txt);">{{ l.sender or '—' }}</td>
                     <td style="padding:12px 16px; color:var(--muted); max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ l.message or '—' }}</td>
                     <td style="padding:12px 16px; color:var(--txt);">{{ l.provider.name if l.provider else '—' }}</td>
@@ -38,7 +42,7 @@
                 {% endfor %}
                 {% else %}
                 <tr>
-                    <td colspan="6" style="padding:40px; text-align:center; color:var(--muted);">
+                    <td colspan="7" style="padding:40px; text-align:center; color:var(--muted);">
                         <i class="fa fa-inbox" style="font-size:32px; display:block; margin-bottom:10px;"></i>
                         No OTP logs yet.
                     </td>
